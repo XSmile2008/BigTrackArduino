@@ -2,10 +2,10 @@
 
 int Chassis::stepsL = 0;
 int Chassis::stepsR = 0;
-int Chassis::motorLF = 0;
-int Chassis::motorLB = 0;
-int Chassis::motorRF = 0;
-int Chassis::motorRB = 0;
+int Chassis::pinDirLeft = 0;
+int Chassis::pinDirRight = 0;
+int Chassis::pinPwmLeft = 0;
+int Chassis::pinPwmRight = 0;
 
 int Chassis::azimuth = 0;
 bool Chassis::azimuthLock = false;
@@ -14,22 +14,22 @@ float e = 3;
 
 HMC5883L* Chassis::compass;
 
-Chassis::Chassis(int motorLF, int motorLB, int motorRF, int motorRB) {
-	Chassis::motorLF = motorLF;
-	Chassis::motorLB = motorLB;
-	Chassis::motorRF = motorRF;
-	Chassis::motorRB = motorRB;
-	pinMode(motorLF, OUTPUT);
-	pinMode(motorLB, OUTPUT);
-	pinMode(motorRF, OUTPUT);
-	pinMode(motorRB, OUTPUT);
+Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRight) {
+	Chassis::pinDirLeft = pinDirLeft;
+	Chassis::pinDirRight = pinDirRight;
+	Chassis::pinPwmLeft = pinPwmLeft;
+	Chassis::pinPwmRight = pinPwmRight;
+
+	pinMode(pinDirLeft, OUTPUT);
+	pinMode(pinDirRight, OUTPUT);
+	pinMode(pinPwmLeft, OUTPUT);
+	pinMode(pinPwmRight, OUTPUT);
+	stop();
 
 	attachInterrupt(0, Chassis::countStepsL, RISING);
 	attachInterrupt(1, Chassis::countStepsR, RISING);
 
 	compass = new HMC5883L();
-	//compass.setScale(0.88);
-	//compass.setMeasurementMode(Measurement_Continuous);//TODO: create more constructors
 }
 
 void Chassis::task() {
@@ -41,31 +41,24 @@ void Chassis::task() {
 	}
 }
 
-void Chassis::test() {
-	stepsL = 1000;
-	stepsR = 1000;
-	int d = 3000;
-	Serial.println("motorLF");
-	digitalWrite(motorLF, HIGH);
-	delay(d);
-	digitalWrite(motorLF, LOW);
+void Chassis::setMotorLeft(int pwm) {
+	if (pwm >= 0) {
+		digitalWrite(pinDirLeft, LOW);
+		analogWrite(pinPwmLeft, pwm);
+	} else {
+		digitalWrite(pinDirLeft, HIGH);
+		analogWrite(pinPwmLeft, 255 + pwm);
+	}
+}
 
-	Serial.println("motorLB");
-	digitalWrite(motorLB, HIGH);
-	delay(d);
-	digitalWrite(motorLB, LOW);
-
-	Serial.println("motorRF");
-	digitalWrite(motorRF, HIGH);
-	delay(d);
-	digitalWrite(motorRF, LOW);
-
-	Serial.println("motorRB");
-	digitalWrite(motorRB, HIGH);
-	delay(d);
-	digitalWrite(motorRB, LOW);
-
-	stop();
+void Chassis::setMotorRight(int pwm) {
+	if (pwm >= 0) {
+		digitalWrite(pinDirRight, LOW);
+		analogWrite(pinPwmRight, pwm);
+	} else {
+		digitalWrite(pinDirRight, HIGH);
+		analogWrite(pinPwmRight, 255 + pwm);
+	}
 }
 
 void Chassis::countStepsL() {
@@ -88,23 +81,47 @@ void Chassis::countStepsR() {
 	// }
 }
 
+void Chassis::test() {
+	stepsL = 1000;//TODO: fix it
+	stepsR = 1000;
+	int d = 3000;
+	setMotorLeft(255);
+	delay(d);
+	setMotorLeft(-255);
+	delay(d);
+	setMotorLeft(0);
+
+	setMotorRight(255);
+	delay(d);
+	setMotorRight(-255);
+	delay(d);
+	setMotorRight(0);
+
+	for (int pwm = -255; pwm <= 255; pwm++) {
+		setMotorLeft(pwm);
+		setMotorRight(pwm);
+		Serial.println(pwm);
+		delay(100);
+	}
+
+	stop();
+}
+
 void Chassis::stop() {
 	stepsL = 0;
 	stepsR = 0;
-	digitalWrite(motorLF, LOW);
-	digitalWrite(motorLB, LOW);
-	digitalWrite(motorRF, LOW);
-	digitalWrite(motorRB, LOW);
+	setMotorLeft(0);
+	setMotorRight(0);
 }
 
 void Chassis::move(int diraction) {
 	stop();
 	if (diraction == FORWARD) {
-		digitalWrite(motorLF, HIGH);
-		digitalWrite(motorRF, HIGH);
+		setMotorLeft(255);
+		setMotorRight(255);
 	} else {
-		digitalWrite(motorLB, HIGH);
-		digitalWrite(motorRB, HIGH);
+		setMotorLeft(-255);
+		setMotorRight(-255);
 	}
 }
 
@@ -122,11 +139,11 @@ void Chassis::setAzimuth(int azimuth, bool lock) {
 
 void Chassis::rotate(int diraction) {
 	if (diraction == LEFT) {
-		digitalWrite(motorLB, HIGH);
-		digitalWrite(motorRF, HIGH);
+		setMotorLeft(-255);
+		setMotorRight(255);
 	} else if (diraction == RIGHT) {
-		digitalWrite(motorRB, HIGH);
-		digitalWrite(motorLF, HIGH);
+		setMotorLeft(255);
+		setMotorRight(-255);
 	}
 }
 

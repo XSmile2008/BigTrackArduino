@@ -22,8 +22,8 @@ void lifeTest() {
 void setup() {
   Wire.begin();
   Serial.begin(115200);
-  chassis = new Chassis(7, 4, 12, 8);
-  chassis->stop();
+  chassis = new Chassis(4, 7, 5, 6);
+  chassis->test();
   //lifeTest();
 }
 
