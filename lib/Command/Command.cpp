@@ -24,7 +24,7 @@ void Command::parseArgs(String args) {
 	argsCount = 0;
 	while (argsCount < 5) {
 		int dividerPos = args.lastIndexOf('-');
-		if (dividerPos == -1) break; 
+		if (dividerPos == -1) break;
 		this->args[argsCount] = new Argument(args.substring(dividerPos));
 		args = args.substring(0, dividerPos);
 		argsCount++;

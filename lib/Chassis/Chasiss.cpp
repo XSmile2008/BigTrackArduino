@@ -85,14 +85,18 @@ void Chassis::test() {
 	stepsL = 1000;//TODO: fix it
 	stepsR = 1000;
 	int d = 3000;
+	Serial.println("Left forward:");
 	setMotorLeft(255);
 	delay(d);
+	Serial.println("Left backward:");
 	setMotorLeft(-255);
 	delay(d);
 	setMotorLeft(0);
 
+	Serial.println("Right forward:");
 	setMotorRight(255);
 	delay(d);
+	Serial.println("Right backward:");
 	setMotorRight(-255);
 	delay(d);
 	setMotorRight(0);
