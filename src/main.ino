@@ -7,6 +7,7 @@
 //Each command starts with ':' and end with new line
 
 //It is not Java - check memory leaks and manualy destroy objects!!!
+//zero terminate strings by '\0'
 
 Chassis* chassis = NULL;
 
@@ -19,38 +20,34 @@ void lifeTest() {
   }
 }
 
+byte buffer[64];
+int bufferSize = 0;
+void readCommands() {
+  while(Serial.available()) {//TODO: check max command length
+    byte b = Serial.read();//read byte
+    if (b == ':') {//if find new command
+      bufferSize == 0;
+      buffer[bufferSize++] = b;
+    } else if (bufferSize > 0) {//if already start parsing command
+      buffer[bufferSize++] = b;
+      if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//find end of command
+        Serial.print("find end of command, command length = "); Serial.println(bufferSize);
+        Command* command = new Command(buffer, bufferSize);
+        bufferSize = 0;
+      }
+    }
+  }
+}
+
 void setup() {
   Wire.begin();
   Serial.begin(115200);
   chassis = new Chassis(4, 7, 5, 6);
-  chassis->test();
+  //chassis->test();
   //lifeTest();
 }
 
 void loop() {
-  //read commands
+  readCommands();
   chassis->task();
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    Command* mycommand = new Command(command);
-    Serial.print("\n\"");
-    Serial.print(mycommand->toString());
-    Serial.println("\"");
-
-    if (mycommand->getCommand().equals(":test")) {
-      chassis->test();
-    } else if (mycommand->getCommand().equals(":stop")) {
-      chassis->stop();
-    } else if (mycommand->getCommand().equals(":move")) {
-      if (mycommand->getArg("-dir")->getValue().equals("f")) {
-        chassis->move(FORWARD);
-      } else {
-        chassis->move(BACKWARD);
-      }
-    } else if (mycommand->getCommand().equals(":lifetest")) {
-        lifeTest();
-    } else {
-        Serial.println("Wrong command");
-    }
-  }
 }
