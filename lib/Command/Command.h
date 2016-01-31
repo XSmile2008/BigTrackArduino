@@ -1,6 +1,7 @@
 #ifndef Command_h
 #define Command_h
 #include "Arduino.h"
+#include "MemoryFree.h"
 
 //TODO: may be use templates
 template <typename T>

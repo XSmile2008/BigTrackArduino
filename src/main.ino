@@ -31,7 +31,6 @@ void readCommands() {
     } else if (bufferSize > 0) {//if already start parsing command
       buffer[bufferSize++] = b;
       if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//find end of command
-        Serial.print("find end of command, command length = "); Serial.println(bufferSize);
         Command* command = new Command(buffer, bufferSize);
         bufferSize = 0;
       }
