@@ -20,6 +20,7 @@ struct Argument {
 class Command {
 	public:
 		Command(byte bytes[], int size);
+		~Command();
 		void printBytes(byte bytes[], int size);
 		byte getCommand();
 		Argument<void>* getArg(byte key);
@@ -27,7 +28,7 @@ class Command {
 	private:
 		byte command;
 		int argsCount;
-		Argument<void>* args[5];
+		Argument<void>* *args;
 };
 
 #endif
