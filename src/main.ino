@@ -33,9 +33,10 @@ void readCommands() {
       buffer[bufferSize++] = b;
       if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//find end of command
         Command* command = new Command(buffer, bufferSize);
-        bufferSize = 0;
+        if (!command->isValid()) Serial.println(F("Command is not valid!"));
         delete(command);
         Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
+        bufferSize = 0;
       }
     }
   }

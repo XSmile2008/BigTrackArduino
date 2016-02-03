@@ -8,9 +8,10 @@ class Command {
 	public:
 		Command(byte bytes[], int size);
 		~Command();
-		void printBytes(byte bytes[], int size);
+		bool isValid();
 		byte getCommand();
 		Argument* getArg(byte key);
+		void printBytes(byte bytes[], int size);
 	private:
 		bool valid;
 		byte command;
