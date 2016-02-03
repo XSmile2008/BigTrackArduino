@@ -4,7 +4,7 @@
 
 class Argument {
   public:
-    Argument(byte bytes[], int pos);
+    Argument(byte key, byte size, void* value);
     ~Argument();
     byte getKey();
     byte getSize();

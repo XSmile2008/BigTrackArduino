@@ -35,7 +35,7 @@ void readCommands() {
         Command* command = new Command(buffer, bufferSize);
         bufferSize = 0;
         delete(command);
-        Serial.print("FreeMem: "); Serial.println(freeMemory());
+        Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
       }
     }
   }
@@ -44,8 +44,9 @@ void readCommands() {
 void setup() {
   Wire.begin();
   Serial.begin(115200);
-  Serial.print("Boot complete, free memomory: "); Serial.println(freeMemory());
+  Serial.print(F("Boot complete, free memomory: ")); Serial.println(freeMemory());
   chassis = new Chassis(4, 7, 5, 6);
+  Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
   //lifeTest();
 }

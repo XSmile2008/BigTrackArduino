@@ -2,20 +2,31 @@
 
 Command::Command(byte bytes[], int size) {
 	printBytes(bytes, size);
-	command = bytes[1];
-	argsCount = 1;//bytes[2];
+	int pos = 1;
+	command = bytes[pos++];
+	argsCount = 5;//bytes[pos++];
 	args = new Argument*[argsCount];
-	int pos = 3;
-	Serial.print("command = "); Serial.println(command);
-	Serial.print("argsCount = "); Serial.println(argsCount);
-	//while (pos < size - 2) {//last two is \r\n
-		int i = 0;
-		args[i] = new Argument(bytes, pos);
+	for (int i = 0; i < argsCount; i++) args[i] = NULL;
+
+	Serial.print(F("command = ")); Serial.println(command);
+	Serial.print(F("argsCount = ")); Serial.println(argsCount);
+
+	for (int i = 0; i < argsCount; i++) {
+		if (pos > size - 3) {
+			Serial.println("Is not valid, return");
+			valid = false;
+			return;
+		}
+		byte key = bytes[pos++];
+		byte size = bytes[pos++];
+		args[i] = new Argument(key, size, &bytes[pos]);
+		//args[i] = new Argument(bytes, &pos);
 		args[i]->toString();
-		Serial.print("&args = "); Serial.println((int) args);
-		Serial.print("&args[0] = "); Serial.println((int) args[0]);
-		Serial.println("construct complete");
-	//}
+		Serial.print("pos = "); Serial.println(pos);
+	}
+	//Serial.print("&args = "); Serial.println((int) args);
+	//Serial.print("&args[0] = "); Serial.println((int) args[0]);
+	Serial.println("construct complete");
 }
 
 Command::~Command() {
@@ -24,8 +35,8 @@ Command::~Command() {
 }
 
 void Command::printBytes(byte bytes[], int size) {
-	Serial.println("--------------------");
-	Serial.print("find end of command, command length = "); Serial.println(size);
+	Serial.println(F("--------------------"));
+	Serial.print(F("find end of command, command length = ")); Serial.println(size);
 	for (int i = 0; i < size; i++) {
 		Serial.print((char) bytes[i]);
 	}
@@ -33,7 +44,7 @@ void Command::printBytes(byte bytes[], int size) {
 	for (int i = 0; i < size; i++) {
 		Serial.print(bytes[i]); Serial.print(", ");
 	}
-	Serial.println("\r\n--------------------");
+	Serial.println(F("\r\n--------------------"));
 }
 
 byte Command::getCommand() {

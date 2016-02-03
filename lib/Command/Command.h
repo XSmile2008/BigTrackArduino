@@ -12,6 +12,7 @@ class Command {
 		byte getCommand();
 		Argument* getArg(byte key);
 	private:
+		bool valid;
 		byte command;
 		int argsCount;
 		Argument **args;
