@@ -2,20 +2,7 @@
 #define Command_h
 #include "Arduino.h"
 #include "MemoryFree.h"
-
-//TODO: may be use templates
-template <typename T>
-struct Argument {
-	byte key;
-	byte size;
-	T* value;
-};
-
-// struct Arg {
-// 	byte arg;
-// 	byte type;
-// 	void* value;
-// };
+#include "Argument.h"
 
 class Command {
 	public:
@@ -23,12 +10,11 @@ class Command {
 		~Command();
 		void printBytes(byte bytes[], int size);
 		byte getCommand();
-		Argument<void>* getArg(byte key);
-		Argument<int>* getIntArg(byte key);
+		Argument* getArg(byte key);
 	private:
 		byte command;
 		int argsCount;
-		Argument<void>* *args;
+		Argument **args;
 };
 
 #endif
