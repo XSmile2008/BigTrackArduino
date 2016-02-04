@@ -1,14 +1,7 @@
 #include "MemoryFree.h"
 #include "Chassis.h"
 #include "Command.h"
-#include "HMC5883L.h"
-
-//TODO: write own Command class that parse String, has command, and set of argument with values
-//For example ":move -fw -s 100" is move forward 100 steps
-//Each command starts with ':' and end with new line
-
-//It is not Java - check memory leaks and manualy destroy objects!!!
-//zero terminate strings by '\0'
+#include "Commands.h"
 
 Chassis* chassis = NULL;
 
@@ -26,20 +19,39 @@ int bufferSize = 0;
 void readCommands() {
   while(Serial.available()) {//TODO: check max command length
     byte b = Serial.read();//read byte
-    if (b == ':') {//if find new command
-      bufferSize == 0;
+    if (bufferSize > 0) {//if already start parsing command
       buffer[bufferSize++] = b;
-    } else if (bufferSize > 0) {//if already start parsing command
-      buffer[bufferSize++] = b;
-      if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//find end of command
-        Command* command = new Command(buffer, bufferSize);
-        if (!command->isValid()) Serial.println(F("Command is not valid!"));
-        delete(command);
-        Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
+      if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//if find end of command
+        runCommand(new Command(buffer, bufferSize));
         bufferSize = 0;
       }
+    } else if (b == ':') {//else start parse new command
+      buffer[bufferSize++] = b;
     }
   }
+}
+
+void runCommand(Command* command) {
+  if (command->isValid()) {
+    switch (command->getCommand()) {
+      case STOP : {
+        chassis->stop();
+        break;
+      }
+      case MOVE : {
+        Argument* diraction = command->getArg(DIRACTION);
+        if (*(byte*)diraction->getValue() == FORWARD)
+          chassis->move(FORWARD);
+        else if (*(byte*)diraction->getValue() == BACKWARD)
+          chassis->move(BACKWARD);
+        break;
+      }
+    }
+  } else {
+    Serial.println(F("Command is not valid!"));
+  }
+  delete(command);
+  Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
 }
 
 void setup() {

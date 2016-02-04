@@ -3,6 +3,7 @@
 Command::Command(byte bytes[], int size) {
 	printBytes(bytes, size);
 	int pos = 1;
+	valid = true;
 	command = bytes[pos++];
 	argsCount = bytes[pos++];
 	args = new Argument*[argsCount];
@@ -27,9 +28,6 @@ Command::Command(byte bytes[], int size) {
 		pos += argSize;
 		Serial.print(F("pos = ")); Serial.println(pos);
 	}
-	//Serial.print("&args = "); Serial.println((int) args);
-	//Serial.print("&args[0] = "); Serial.println((int) args[0]);
-	Serial.println(F("construct complete"));
 }
 
 Command::~Command() {

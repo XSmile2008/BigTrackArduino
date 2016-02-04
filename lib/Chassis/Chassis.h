@@ -3,10 +3,10 @@
 #include "Arduino.h"
 #include "HMC5883L.h"
 
-#define LEFT 0
-#define RIGHT 1
-#define FORWARD 2
-#define BACKWARD 3
+#define LEFT 'l'
+#define RIGHT 'r'
+#define FORWARD 'f'
+#define BACKWARD 'b'
 
 class Chassis {
 public:

@@ -112,6 +112,7 @@ void Chassis::test() {
 }
 
 void Chassis::stop() {
+	Serial.println("stop");
 	stepsL = 0;
 	stepsR = 0;
 	setMotorLeft(0);
