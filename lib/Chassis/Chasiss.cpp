@@ -7,7 +7,7 @@ int Chassis::pinDirRight = 0;
 int Chassis::pinPwmLeft = 0;
 int Chassis::pinPwmRight = 0;
 
-int Chassis::azimuth = 0;
+int Chassis::targetAzimuth = -1;
 bool Chassis::azimuthLock = false;
 
 float e = 3;
@@ -32,12 +32,19 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 	compass = new HMC5883L();
 }
 
+long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
-	compass->getAzimuth();//TODO: remove
-	if (azimuth != -1) {
-		if (abs(azimuth - compass->getAzimuth()) >= e)
-			rotateTo(azimuth);
-		else if (!azimuthLock) azimuth = -1;
+	if (millis() > lastTele + 1000) {
+		lastTele = millis();
+		Serial.print("azimuth = ");
+		Serial.print(compass->getAzimuth());
+		Serial.print(" | target = ");
+		Serial.println(targetAzimuth);
+	}
+	if (targetAzimuth != -1) {
+		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
+			rotateTo(targetAzimuth);
+		//else if (!azimuthLock) targetAzimuth = -1;
 	}
 }
 
@@ -138,7 +145,8 @@ void Chassis::moveSteps(int diraction, int steps) {
 }
 
 void Chassis::setAzimuth(int azimuth, bool lock) {
-	Chassis::azimuth = azimuth;
+	Serial.print("new azimuth = "); Serial.println(azimuth);
+	Chassis::targetAzimuth = azimuth;
 	Chassis::azimuthLock = lock;
 }
 
@@ -152,12 +160,16 @@ void Chassis::rotate(int diraction) {
 	}
 }
 
-void Chassis::rotateTo(int azimuth) {
+void Chassis::rotateTo(int targetAzimuth) {
 	int currAzimuth = (int) compass->getAzimuth();
-	azimuth += 360 - currAzimuth;
-	if (azimuth <= 180) {
+	if (millis() > lastTele + 1000) {
+		Serial.print("targetAzimuth - currAzimuth = "); Serial.println(targetAzimuth - currAzimuth - ((currAzimuth - targetAzimuth) > 180 ? 360 : 0) );
+	}
+	if (targetAzimuth - currAzimuth >= 0) {
+		//Serial.println("rotate RIGHT");
 		rotate(RIGHT);
 	} else {
+		//Serial.println("rotate LEFT");
 		rotate(LEFT);
 	}
 }

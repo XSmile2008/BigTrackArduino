@@ -39,7 +39,7 @@ private:
 	static int pinPwmLeft;
 	static int pinPwmRight;
 
-	static int azimuth;
+	static int targetAzimuth;
 	static bool azimuthLock;
 
 	static HMC5883L* compass;

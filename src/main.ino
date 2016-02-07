@@ -46,6 +46,15 @@ void runCommand(Command* command) {
           chassis->move(BACKWARD);
         break;
       }
+      case ROTATE : {
+        Argument* azimuth = command->getArg(AZIMUTH);
+        chassis->setAzimuth(*(int*) azimuth->getValue(), false);
+        break;
+      }
+      case LIFETEST : {
+        lifeTest();
+        break;
+      }
     }
   } else {
     Serial.println(F("Command is not valid!"));
