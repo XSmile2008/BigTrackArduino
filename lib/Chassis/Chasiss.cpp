@@ -36,10 +36,10 @@ long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
 	if (millis() > lastTele + 1000) {
 		lastTele = millis();
-		Serial.print("azimuth = ");
-		Serial.print(compass->getAzimuth());
-		Serial.print(" | target = ");
-		Serial.println(targetAzimuth);
+		// Serial.print("azimuth = ");
+		// Serial.print(compass->getAzimuth());
+		// Serial.print(" | target = ");
+		// Serial.println(targetAzimuth);
 	}
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
@@ -162,14 +162,11 @@ void Chassis::rotate(int diraction) {
 
 void Chassis::rotateTo(int targetAzimuth) {
 	int currAzimuth = (int) compass->getAzimuth();
-	if (millis() > lastTele + 1000) {
-		Serial.print("targetAzimuth - currAzimuth = "); Serial.println(targetAzimuth - currAzimuth - ((currAzimuth - targetAzimuth) > 180 ? 360 : 0) );
-	}
-	if (targetAzimuth - currAzimuth >= 0) {
-		//Serial.println("rotate RIGHT");
+	int deviation = targetAzimuth - currAzimuth;
+	deviation += ((deviation <= -180) ? 360 : (deviation >= 180 ? -360 : 0));
+	if (deviation >= 0) {
 		rotate(RIGHT);
 	} else {
-		//Serial.println("rotate LEFT");
 		rotate(LEFT);
 	}
 }
