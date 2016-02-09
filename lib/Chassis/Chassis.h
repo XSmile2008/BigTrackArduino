@@ -13,8 +13,8 @@ public:
 	Chassis(int pinDirL, int pinDirR, int pinPwmL, int pinPwmR);
 	void task();
 
-	void setMotorLeft(int pwm);
-	void setMotorRight(int pwm);
+	static void setMotorLeft(int pwm);
+	static void setMotorRight(int pwm);
 
 	void test();
 	void stop();
@@ -28,11 +28,23 @@ public:
 	void rotateTo(int azimuth);
 
 private:
+//methods
 	static void countStepsL();
 	static void countStepsR();
+	static void checkSteps();
 
-	static int stepsL;
-	static int stepsR;
+//variables
+	static int stepsLeft;
+	static int stepsRight;
+
+	static int stepLastMillisLeft;
+	static int stepLastMillisRight;
+
+	static int stepTimeLeft;
+	static int stepTimeRight;
+
+	static int pwmLeft;
+	static int pwmRight;
 
 	static int pinDirLeft;
 	static int pinDirRight;

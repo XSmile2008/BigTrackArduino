@@ -1,7 +1,17 @@
 #include "Chassis.h"
 
-int Chassis::stepsL = 0;
-int Chassis::stepsR = 0;
+int Chassis::stepsLeft = 0;
+int Chassis::stepsRight = 0;
+
+int Chassis::stepLastMillisLeft = 0;
+int Chassis::stepLastMillisRight = 0;
+
+int Chassis::stepTimeLeft = 0;
+int Chassis::stepTimeRight = 0;
+
+int Chassis::pwmLeft = 0;
+int Chassis::pwmRight = 0;
+
 int Chassis::pinDirLeft = 0;
 int Chassis::pinDirRight = 0;
 int Chassis::pinPwmLeft = 0;
@@ -9,8 +19,6 @@ int Chassis::pinPwmRight = 0;
 
 int Chassis::targetAzimuth = -1;
 bool Chassis::azimuthLock = false;
-
-float e = 3;
 
 HMC5883L* Chassis::compass;
 
@@ -32,14 +40,13 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 	compass = new HMC5883L();
 }
 
+float e = 3;
 long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
-	if (millis() > lastTele + 1000) {
+	if (millis() > lastTele + 3000) {
 		lastTele = millis();
-		// Serial.print("azimuth = ");
-		// Serial.print(compass->getAzimuth());
-		// Serial.print(" | target = ");
-		// Serial.println(targetAzimuth);
+		Serial.print("azimuth = "); Serial.print(compass->getAzimuth());
+		Serial.print(" | target = "); Serial.println(targetAzimuth);
 	}
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
@@ -49,6 +56,7 @@ void Chassis::task() {
 }
 
 void Chassis::setMotorLeft(int pwm) {
+	pwmLeft = pwm;
 	if (pwm >= 0) {
 		digitalWrite(pinDirLeft, LOW);
 		analogWrite(pinPwmLeft, pwm);
@@ -59,6 +67,7 @@ void Chassis::setMotorLeft(int pwm) {
 }
 
 void Chassis::setMotorRight(int pwm) {
+	pwmRight = pwm;
 	if (pwm >= 0) {
 		digitalWrite(pinDirRight, LOW);
 		analogWrite(pinPwmRight, pwm);
@@ -69,28 +78,40 @@ void Chassis::setMotorRight(int pwm) {
 }
 
 void Chassis::countStepsL() {
-	stepsL--;
-	Serial.print("stepsL = ");
-	Serial.println(stepsL);
-	// if (stepsL <= 0) {
-	// 	digitalWrite(motorLF, LOW);
- //    	digitalWrite(motorLB, LOW);
-	// }
+	stepsLeft++;
+	Serial.print("stepsLeft = "); Serial.println(stepsLeft);
+
+	if (stepLastMillisLeft > 0) {
+		int stepCurrMillisLeft = millis();
+		stepTimeLeft = stepCurrMillisLeft - stepLastMillisLeft;
+		stepLastMillisLeft = stepCurrMillisLeft;
+		checkSteps();
+	} else stepLastMillisLeft = millis();
 }
 
 void Chassis::countStepsR() {
-	stepsR--;
-	Serial.print("stepsR = ");
-	Serial.println(stepsR);
-	// if (stepsR <= 0) {
-	// 	digitalWrite(motorRF, LOW);
- //    	digitalWrite(motorRB, LOW);
-	// }
+	stepsRight++;
+	Serial.print("stepsRight = "); Serial.println(stepsRight);
+
+	if (stepLastMillisRight > 0) {
+		int stepCurrMillisLeft = millis();
+		stepTimeLeft = stepCurrMillisLeft - stepLastMillisLeft;
+		stepLastMillisLeft = stepCurrMillisLeft;
+		checkSteps();
+	} else stepLastMillisRight = millis();
+}
+
+void Chassis::checkSteps() {
+	if (stepTimeLeft > stepTimeRight) {
+		setMotorLeft(map(stepTimeRight, 0, stepTimeLeft, 0, 255) * (pwmLeft = 0 ? 0 : pwmLeft > 0 ? 1 : -1));
+		setMotorRight(pwmRight == 0 ? 0 : (pwmRight > 0 ? 255 : -255));
+	} else {
+		setMotorRight(map(stepTimeLeft, 0, stepTimeRight, 0, 255) * (pwmRight = 0 ? 0 : pwmRight > 0 ? 1 : -1));
+		setMotorLeft(pwmLeft == 0 ? 0 : (pwmLeft > 0 ? 255 : -255));
+	}
 }
 
 void Chassis::test() {
-	stepsL = 1000;//TODO: fix it
-	stepsR = 1000;
 	int d = 3000;
 	Serial.println(F("Left forward:"));
 	setMotorLeft(255);
@@ -119,9 +140,6 @@ void Chassis::test() {
 }
 
 void Chassis::stop() {
-	Serial.println("stop");
-	stepsL = 0;
-	stepsR = 0;
 	setMotorLeft(0);
 	setMotorRight(0);
 }
@@ -137,10 +155,8 @@ void Chassis::move(int diraction) {
 	}
 }
 
-void Chassis::moveSteps(int diraction, int steps) {
+void Chassis::moveSteps(int diraction, int steps) {//TODO:
 	stop();
-	stepsR = steps;
-	stepsL = steps;
 	move(diraction);
 }
 

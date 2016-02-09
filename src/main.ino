@@ -47,8 +47,8 @@ void runCommand(Command* command) {
         break;
       }
       case ROTATE : {
-        Argument* azimuth = command->getArg(AZIMUTH);
-        chassis->setAzimuth(*(int*) azimuth->getValue(), false);
+        if (command->getArg(AZIMUTH) != NULL) chassis->setAzimuth(*(int*) command->getArg(AZIMUTH)->getValue(), false);
+        else if (command->getArg(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArg(DIRACTION)->getValue());
         break;
       }
       case LIFETEST : {
