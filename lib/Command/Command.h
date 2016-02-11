@@ -7,14 +7,15 @@
 class Command {
 	public:
 		Command(byte bytes[], int size);
+		Command(byte key);
 		~Command();
 		bool isValid();
-		byte getCommand();
+		byte getKey();
 		Argument* getArg(byte key);
 		void printBytes(byte bytes[], int size);
 	private:
 		bool valid;
-		byte command;
+		byte key;
 		int argsCount;
 		Argument **args;
 };

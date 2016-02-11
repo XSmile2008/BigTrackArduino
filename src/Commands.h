@@ -12,4 +12,7 @@
 #define DISTANCE 'D'
 #define AZIMUTH 'a'
 
+//Telemetry
+#define TELEMETRY 'T'
+
 #endif

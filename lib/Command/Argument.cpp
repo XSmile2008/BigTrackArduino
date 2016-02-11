@@ -27,9 +27,9 @@ void* Argument::getValue() {
 void Argument::toString() {
   Serial.print("arg.key = "); Serial.println(key);
   Serial.print("arg.size = "); Serial.println(size);
-  Serial.print("arg.value@"); Serial.print((int) value); Serial.print(" = "); Serial.println(*(int*) value);
+  Serial.print("arg.value@"); Serial.print((long) value); Serial.print(" = "); Serial.println(*(int*) value);
   for(int i = 0; i < size; i++) {
-    Serial.print("byte"); Serial.print(i); Serial.print("@"); Serial.print((int) value + i); Serial.print(" = ");
+    Serial.print("byte"); Serial.print(i); Serial.print("@"); Serial.print((long) value + i); Serial.print(" = ");
     Serial.print(*(byte*) (value + i)); Serial.print(", ");
   } Serial.println();
 }

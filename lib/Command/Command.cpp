@@ -4,12 +4,12 @@ Command::Command(byte bytes[], int size) {
 	printBytes(bytes, size);
 	int pos = 1;
 	valid = true;
-	command = bytes[pos++];
+	key = bytes[pos++];
 	argsCount = bytes[pos++];
 	args = new Argument*[argsCount];
 	for (int i = 0; i < argsCount; i++) args[i] = NULL;
 
-	Serial.print(F("command = ")); Serial.println(command);
+	Serial.print(F("key = ")); Serial.println(key);
 	Serial.print(F("argsCount = ")); Serial.println(argsCount);
 
 	for (int i = 0; i < argsCount; i++) {
@@ -30,6 +30,11 @@ Command::Command(byte bytes[], int size) {
 	}
 }
 
+Command::Command(byte key) {
+	Command::key = key;
+	argsCount = 0;
+}
+
 Command::~Command() {
 	for (int i = 0; i < argsCount; i++) delete args[i];
 	delete[] args;
@@ -39,8 +44,8 @@ bool Command::isValid() {
 	return valid;
 }
 
-byte Command::getCommand() {
-	return command;
+byte Command::getKey() {
+	return key;
 }
 
 Argument* Command::getArg(byte key) {

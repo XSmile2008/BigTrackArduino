@@ -2,6 +2,7 @@
 #include "Chassis.h"
 #include "Command.h"
 #include "Commands.h"
+#include "List.h"
 
 Chassis* chassis = NULL;
 
@@ -33,7 +34,7 @@ void readCommands() {
 
 void runCommand(Command* command) {
   if (command->isValid()) {
-    switch (command->getCommand()) {
+    switch (command->getKey()) {
       case STOP : {
         chassis->stop();
         break;
