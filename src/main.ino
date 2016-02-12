@@ -2,7 +2,9 @@
 #include "Chassis.h"
 #include "Command.h"
 #include "Commands.h"
-#include "List.h"
+
+#include "ArrayList.h"
+#include "ArrayList.cpp"
 
 Chassis* chassis = NULL;
 
@@ -67,14 +69,24 @@ void runCommand(Command* command) {
 void setup() {
   Wire.begin();
   Serial.begin(115200);
-  Serial.print(F("Boot complete, free memomory: ")); Serial.println(freeMemory());
-  chassis = new Chassis(4, 7, 5, 6);
-  Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
+  Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
+  //chassis = new Chassis(4, 7, 5, 6);
+  //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
   //lifeTest();
+  ArrayList<int> *list = new ArrayList<int>();
+  for (int i = 0; i < 20; i++) list->add(i);
+  for (int i = 0; i < list->size(); i++) {
+    Serial.print(list->get(i)); Serial.print(", ");
+  }
+  Serial.println();
+	Serial.println(list->size());
+  Serial.print(F("nyan memory: ")); Serial.println(freeMemory());
+  delete list;
+  Serial.print(F("punyan memory: ")); Serial.println(freeMemory());
 }
 
 void loop() {
-  readCommands();
-  chassis->task();
+  //readCommands();
+  //chassis->task();
 }
