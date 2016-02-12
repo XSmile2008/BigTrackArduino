@@ -16,19 +16,19 @@ ArrayList<T>::ArrayList(int initialCapacity) {
 
 template< typename T >
 ArrayList<T>::~ArrayList() {
-  clear();
+  delete[] values;
 }
 
 template< typename T >
 void ArrayList<T>::add(T item) {
-  rangeCheckForAdd(valuesSize + 1);
+  ensureCapacity(valuesSize +1);
   values[valuesSize++] = item;
   Serial.print("size = "); Serial.println(size());
 }
 
 template< typename T >
 void ArrayList<T>::add(int index, T item) {
-  rangeCheckForAdd(valuesSize + 1);
+  ensureCapacity(valuesSize + 1);
   valuesSize++;
   //TODO:
 }
@@ -49,7 +49,7 @@ T ArrayList<T>::get(int index) {
 template< typename T >
 T ArrayList<T>::remove(int index) {//TODO: check
   if (index < valuesSize - 1)
-    memccpy(values[index], values[index + 1], valuesSize - index);
+    memcpy(&values[index], &values[index + 1], valuesSize - index);
   valuesSize--;
 }
 
@@ -83,12 +83,8 @@ bool ArrayList<T>::rangeCheck(int index) {
 }
 
 template< typename T >
-bool ArrayList<T>::rangeCheckForAdd(int index) {
-  if (index < capacity) return true;
-  else {
-    grow(index);
-    return false;
-  }
+void ArrayList<T>::ensureCapacity(int minCapacity) {
+  if (capacity < minCapacity) grow(minCapacity);
 }
 
 template< typename T >

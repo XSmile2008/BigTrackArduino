@@ -23,8 +23,7 @@ class ArrayList : public List<T> {
   private:
 
     bool rangeCheck(int index);
-    bool rangeCheckForAdd(int index);
-
+    void ensureCapacity(int index);
     void grow(int minCapacity);
 
     int capacity;
