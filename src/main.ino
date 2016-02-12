@@ -8,6 +8,8 @@
 
 Chassis* chassis = NULL;
 
+//use int8_t, uint8_t
+
 void lifeTest() {
   int lifetime = 0;
   while (true) {
@@ -50,7 +52,7 @@ void runCommand(Command* command) {
         break;
       }
       case ROTATE : {
-        if (command->getArg(AZIMUTH) != NULL) chassis->setAzimuth(*(int*) command->getArg(AZIMUTH)->getValue(), false);
+        if (command->getArg(AZIMUTH) != NULL) chassis->setAzimuth(*(int16_t*) command->getArg(AZIMUTH)->getValue(), false);
         else if (command->getArg(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArg(DIRACTION)->getValue());
         break;
       }
@@ -74,16 +76,35 @@ void setup() {
   //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
   //lifeTest();
-  ArrayList<int> *list = new ArrayList<int>();
+  ArrayList<byte> *list = new ArrayList<byte>();
   for (int i = 0; i < 20; i++) list->add(i);
-  for (int i = 0; i < list->size(); i++) {
-    Serial.print(list->get(i)); Serial.print(", ");
-  }
-  Serial.println();
-	Serial.println(list->size());
-  Serial.print(F("nyan memory: ")); Serial.println(freeMemory());
+  Serial.print(F("nyan: "));
+  list->print();
+
+  Serial.print(F("remove [5]: "));
+  list->remove(5);
+  list->print();
+
+  Serial.print(F("trim: "));
+  list->trimToSize();
+  list->print();
+
+  Serial.print(F("remove [0]: "));
+  list->remove(0);
+  list->print();
+
+  Serial.print(F("remove [size - 1]: "));
+  list->remove(list->size() - 1);
+  list->print();
+
+  Serial.print(F("clear: "));
+  list->clear();
+  list->print();
+
+  Serial.println(list->get(11));
+
   delete list;
-  Serial.print(F("punyan memory: ")); Serial.println(freeMemory());
+  Serial.print(F("after delete: ")); Serial.println(freeMemory());
 }
 
 void loop() {

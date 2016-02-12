@@ -20,6 +20,9 @@ class ArrayList : public List<T> {
     int size();
     bool isEmpty();
     void trimToSize();
+
+    //@Deprecated
+    void print();
   private:
 
     bool rangeCheck(int index);
