@@ -68,33 +68,38 @@ void runCommand(Command* command) {
   Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
 }
 
-void setup() {
-  Wire.begin();
-  Serial.begin(115200);
-  Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
-  //chassis = new Chassis(4, 7, 5, 6);
-  //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
-  //chassis->test();
-  //lifeTest();
-  ArrayList<byte> *list = new ArrayList<byte>();
+void listTest() {
+  Serial.print(F("free memory before create list: ")); Serial.println(freeMemory());
+  Serial.print(F("create list: "));
+  List<int> *list = new ArrayList<int>();
+  list->print();
+
+  Serial.print(F("add 20 items: "));
   for (int i = 0; i < 20; i++) list->add(i);
-  Serial.print(F("nyan: "));
   list->print();
 
   Serial.print(F("remove [5]: "));
   list->remove(5);
   list->print();
 
-  Serial.print(F("trim: "));
-  list->trimToSize();
-  list->print();
+  // Serial.print(F("trim: "));
+  // list->trimToSize();
+  // list->print();
 
   Serial.print(F("remove [0]: "));
   list->remove(0);
   list->print();
 
+  Serial.print(F("add 5 @[4]: "));
+  list->add(4, 5);
+  list->print();
+
   Serial.print(F("remove [size - 1]: "));
   list->remove(list->size() - 1);
+  list->print();
+
+  Serial.print(F("add 11 items: "));
+  for (int i = 0; i < 11; i++) list->add(i);
   list->print();
 
   Serial.print(F("clear: "));
@@ -103,8 +108,23 @@ void setup() {
 
   Serial.println(list->get(11));
 
+  Serial.print(F("add 11 items: "));
+  for (int i = 0; i < 11; i++) list->add(i);
+  list->print();
+
   delete list;
   Serial.print(F("after delete: ")); Serial.println(freeMemory());
+}
+
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+  Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
+  //chassis = new Chassis(4, 7, 5, 6);
+  //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
+  //chassis->test();
+  //lifeTest();
+  listTest();
 }
 
 void loop() {

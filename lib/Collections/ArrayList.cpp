@@ -9,7 +9,7 @@ ArrayList<T>::ArrayList() {
 }
 
 template< typename T >
-ArrayList<T>::ArrayList(int initialCapacity) {
+ArrayList<T>::ArrayList(uint8_t initialCapacity) {
   values = new T[initialCapacity];
   capacity = initialCapacity;
   valuesSize = 0;
@@ -27,34 +27,33 @@ void ArrayList<T>::add(T item) {
 }
 
 template< typename T >
-void ArrayList<T>::add(int index, T item) {//TODO: complete and test
-  if (rangeCheck(index)) {
+void ArrayList<T>::add(uint16_t index, T item) {
+  if (rangeCheck(index == valuesSize ? index - 1 : index)) {
     ensureCapacity(valuesSize + 1);
+    memmove(&values[index + 1], &values[index], (valuesSize - index) * sizeof(T));
+    values[index] = item;
     valuesSize++;
-    memcpy(&values[index + 1], &values[index], (valuesSize - index) * sizeof(T));
   }
 }
 
 template< typename T >
-T ArrayList<T>::set(int index, T item) {
+T ArrayList<T>::set(uint16_t index, T item) {
   if (rangeCheck(index)) {
     T oldValue = values[index];
     values[index] = item;
     return oldValue;
-  } else {
-    return item;
-  }
+  } else return (T) NULL;
 }
 
 template< typename T >
-T ArrayList<T>::get(int index) {
+T ArrayList<T>::get(uint16_t index) {
   if (rangeCheck(index)) {
     return values[index];
-  }
+  } else return (T) NULL;
 }
 
 template< typename T >
-T ArrayList<T>::remove(int index) {//TODO: check
+T ArrayList<T>::remove(uint16_t index) {//TODO: check
   if (rangeCheck(index)) {
     T removed = values[index];
     if (index < valuesSize - 1) {
@@ -62,7 +61,7 @@ T ArrayList<T>::remove(int index) {//TODO: check
     }
     valuesSize--;
     return removed;
-  }
+  } else return (T) NULL;
 }
 
 template< typename T >
@@ -71,7 +70,7 @@ void ArrayList<T>::clear() {
 }
 
 template< typename T >
-int ArrayList<T>::size() {
+uint16_t ArrayList<T>::size() {
   return valuesSize;
 }
 
@@ -92,24 +91,23 @@ void ArrayList<T>::trimToSize() {
 }
 
 template< typename T >
-bool ArrayList<T>::rangeCheck(int index) {
+bool ArrayList<T>::rangeCheck(uint16_t index) {
   if (index < size()) {
     return true;
   } else {
     Serial.print(F("IndexOutOfBoundsException: Index: ")); Serial.print(index); Serial.print(F(", Size: ")); Serial.println(valuesSize);
     return false;
   }
-
 }
 
 template< typename T >
-void ArrayList<T>::ensureCapacity(int minCapacity) {
+void ArrayList<T>::ensureCapacity(uint16_t minCapacity) {
   if (capacity < minCapacity) grow(minCapacity);
 }
 
 template< typename T >
-void ArrayList<T>::grow(int minCapacity) {
-  int newCapacity = capacity + (capacity >> 1);
+void ArrayList<T>::grow(uint16_t minCapacity) {
+  uint16_t newCapacity = capacity + (capacity >> 1);
   if (newCapacity < minCapacity) newCapacity = minCapacity;
   T* newValues = new T[newCapacity];
   memcpy(newValues, values, capacity * sizeof(T));
@@ -125,8 +123,8 @@ void ArrayList<T>::print() {
   Serial.print(F("RAM: ")); Serial.println(freeMemory());
   Serial.print(F("Capacity: ")); Serial.print(capacity);
   Serial.print(F(" | size = ")); Serial.println(valuesSize);
-  for (int i = 0; i < capacity; i++) {
-    Serial.print(F("@")); Serial.print((int) &values[i]); Serial.print(F(" = ")); Serial.print(values[i]); Serial.print(F(", "));
+  for (uint16_t i = 0; i < valuesSize; i++) {
+    Serial.print(F("@")); Serial.print((uint16_t) &values[i]); Serial.print(F(" = ")); Serial.print(values[i]); Serial.print(F(", "));
   }
   Serial.println(F("\n-------------------"));
 }

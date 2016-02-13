@@ -1,18 +1,21 @@
 #ifndef List_h
 #define List_h
+#include "Arduino.h"
 
 template<typename T>
 class List {
   public:
-    virtual void add(T item);
-    virtual void add(int index, T item);
-    virtual T set(int index, T item);
-    virtual T get(int index);
-    virtual T remove(int index);
-    virtual void clear();
+    virtual ~List() {};
+    virtual void add(T item) {};
+    virtual void add(uint16_t index, T item) {};
+    virtual T set(uint16_t index, T item) {return (T) NULL;};
+    virtual T get(uint16_t index) {return (T) NULL;};
+    virtual T remove(uint16_t index) {return (T) NULL;};
+    virtual void clear() {};
 
-    virtual int size();
-    virtual bool isEmpty();
+    virtual uint16_t size() {return (uint16_t) NULL;};
+    virtual bool isEmpty() {return (bool) NULL;};
+    virtual void print() {};//TODO: may be @Deprecated
   private:
 };
 

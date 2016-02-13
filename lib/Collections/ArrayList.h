@@ -1,23 +1,22 @@
 #ifndef ArrayList_h
 #define ArrayList_h
 #include "List.h"
-#include "Arduino.h"
 
 template<typename T>
 class ArrayList : public List<T> {
   public:
     ArrayList();
-    ArrayList(int initialCapacity);
+    ArrayList(uint8_t initialCapacity);
     ~ArrayList();
 
     void add(T item);
-    void add(int index, T item);
-    T set(int index, T item);
-    T get(int index);
-    T remove(int index);
+    void add(uint16_t index, T item);
+    T set(uint16_t index, T item);
+    T get(uint16_t index);
+    T remove(uint16_t index);
     void clear();
 
-    int size();
+    uint16_t size();
     bool isEmpty();
     void trimToSize();
 
@@ -25,15 +24,15 @@ class ArrayList : public List<T> {
     void print();
   private:
 
-    bool rangeCheck(int index);
-    void ensureCapacity(int index);
-    void grow(int minCapacity);
+    bool rangeCheck(uint16_t index);
+    void ensureCapacity(uint16_t index);
+    void grow(uint16_t minCapacity);
 
-    int capacity;
-    int valuesSize;
+    uint16_t capacity;
+    uint16_t valuesSize;
     T* values;
 
-    static const int DEFAULT_CAPACITY = 1;
+    static const uint8_t DEFAULT_CAPACITY = 1;
 };
 
 #endif
