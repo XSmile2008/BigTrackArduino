@@ -41,7 +41,7 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 }
 
 float e = 3;
-long lastTele = 0;//TODO: check if millis() is 0
+unsigned long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
 	if (millis() > lastTele + 3000) {
 		lastTele = millis();

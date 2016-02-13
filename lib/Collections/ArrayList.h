@@ -6,7 +6,7 @@ template<typename T>
 class ArrayList : public List<T> {
   public:
     ArrayList();
-    ArrayList(uint8_t initialCapacity);
+    ArrayList(uint16_t initialCapacity);
     ~ArrayList();
 
     void add(T item);

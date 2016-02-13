@@ -9,7 +9,7 @@ class Argument {
     byte getKey();
     byte getSize();
     void* getValue();
-    void toString();
+    void print();
   private:
     byte key;
 	  byte size;

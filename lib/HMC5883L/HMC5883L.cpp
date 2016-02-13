@@ -21,6 +21,7 @@ MagnetometerRaw HMC5883L::readRawAxis() {
   return raw;
 }
 
+//TODO: try use enum
 int HMC5883L::setScale(float gauss) {
 	uint8_t regValue = 0x00;
 	if(gauss == 0.88) {

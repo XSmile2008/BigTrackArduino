@@ -2,6 +2,7 @@
 #define Command_h
 #include "Arduino.h"
 #include "MemoryFree.h"
+#include "ArrayList.h"
 #include "Argument.h"
 
 class Command {
@@ -16,8 +17,7 @@ class Command {
 	private:
 		bool valid;
 		byte key;
-		int argsCount;
-		Argument **args;
+		List<Argument*> *args;
 };
 
 #endif

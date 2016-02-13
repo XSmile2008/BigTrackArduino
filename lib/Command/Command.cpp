@@ -1,13 +1,14 @@
 #include "Command.h"
+#include "ArrayList.cpp"
 
 Command::Command(byte bytes[], int size) {
 	printBytes(bytes, size);
 	int pos = 1;
 	valid = true;
 	key = bytes[pos++];
-	argsCount = bytes[pos++];
-	args = new Argument*[argsCount];
-	for (int i = 0; i < argsCount; i++) args[i] = NULL;
+	int argsCount = bytes[pos++];
+	args = new ArrayList<Argument*>(argsCount);
+	//for (int i = 0; i < argsCount; i++) args[i] = NULL;
 
 	Serial.print(F("key = ")); Serial.println(key);
 	Serial.print(F("argsCount = ")); Serial.println(argsCount);
@@ -23,8 +24,8 @@ Command::Command(byte bytes[], int size) {
 		// 	valid = false;
 		// 	return;
 		// }
-		args[i] = new Argument(argKey, argSize, &bytes[pos]);
-		args[i]->toString();
+		args-> add(new Argument(argKey, argSize, &bytes[pos]));
+		args->get(i)->print();
 		pos += argSize;
 		Serial.print(F("pos = ")); Serial.println(pos);
 	}
@@ -32,12 +33,12 @@ Command::Command(byte bytes[], int size) {
 
 Command::Command(byte key) {
 	Command::key = key;
-	argsCount = 0;
+	args = new ArrayList<Argument*>();
 }
 
 Command::~Command() {
-	for (int i = 0; i < argsCount; i++) delete args[i];
-	delete[] args;
+	for (uint16_t i = 0; i < args->size(); i++) delete args->get(i);
+	delete args;
 }
 
 bool Command::isValid() {
@@ -49,8 +50,8 @@ byte Command::getKey() {
 }
 
 Argument* Command::getArg(byte key) {
-	for (int i = 0; i < argsCount; i++) {
-		if (args[i]->getKey() == key) return args[i];
+	for (uint8_t i = 0; i < args->size(); i++) {
+		if (args->get(i)->getKey() == key) return args->get(i);
 	}
 	return NULL;
 }

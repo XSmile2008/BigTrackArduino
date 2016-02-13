@@ -71,7 +71,7 @@ void runCommand(Command* command) {
 void listTest() {
   Serial.print(F("free memory before create list: ")); Serial.println(freeMemory());
   Serial.print(F("create list: "));
-  List<int> *list = new ArrayList<int>();
+  List<uint8_t> *list = new ArrayList<uint8_t>();
   list->print();
 
   Serial.print(F("add 20 items: "));
@@ -124,10 +124,10 @@ void setup() {
   //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
   //lifeTest();
-  listTest();
+  //listTest();
 }
 
 void loop() {
-  //readCommands();
-  //chassis->task();
+  readCommands();
+  chassis->task();
 }
