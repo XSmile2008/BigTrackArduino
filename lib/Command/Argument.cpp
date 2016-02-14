@@ -1,14 +1,14 @@
 #include "Argument.h"
 
 Argument::Argument(byte key, byte size, void* value) {
-  Serial.println("Argument.constructor()");
+  Serial.println(F("Argument.constructor()"));
   Argument::key = key;
   Argument::size = size;
   Argument::value = memcpy(malloc(size), value, size);
 }
 
 Argument::~Argument() {
-  Serial.println("Argument.destructor()");
+  Serial.println(F("Argument.destructor()"));
   free(value);
 }
 
@@ -25,11 +25,11 @@ void* Argument::getValue() {
 }
 
 void Argument::print() {
-  Serial.print("arg.key = "); Serial.println(key);
-  Serial.print("arg.size = "); Serial.println(size);
-  Serial.print("arg.value@"); Serial.print((long) value); Serial.print(" = "); Serial.println(*(int*) value);
+  Serial.print(F("arg.key = ")); Serial.println(key);
+  Serial.print(F("arg.size = ")); Serial.println(size);
+  Serial.print(F("arg.value@")); Serial.print((long) value); Serial.print(F(" = ")); Serial.println(*(int*) value);
   for(int i = 0; i < size; i++) {
-    Serial.print("byte"); Serial.print(i); Serial.print("@"); Serial.print((long) value + i); Serial.print(" = ");
-    Serial.print(*(byte*) ((int) value + i)); Serial.print(", ");
+    Serial.print(F("byte")); Serial.print(i); Serial.print(F("@")); Serial.print((long) value + i); Serial.print(F(" = "));
+    Serial.print(*(byte*) ((int) value + i)); Serial.print(F(", "));
   } Serial.println();
 }

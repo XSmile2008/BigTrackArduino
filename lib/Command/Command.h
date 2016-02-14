@@ -7,17 +7,22 @@
 
 class Command {
 	public:
-		Command(byte bytes[], int size);
 		Command(byte key);
+		Command(byte key, List<Argument*>* arguments);
 		~Command();
-		bool isValid();
+		void serialize();
+		static Command* deserialize(byte bytes[], int size);
 		byte getKey();
-		Argument* getArg(byte key);
-		void printBytes(byte bytes[], int size);
+		void setKey(byte key);
+		List<Argument*>* getArguments();
+		void setArguments(List<Argument*> arguments);
+		Argument* getArgument(byte key);
+
+		static const byte COMMAND_START[];
+		static const byte COMMAND_END[];
 	private:
-		bool valid;
 		byte key;
-		List<Argument*> *args;
+		List<Argument*>* arguments;
 };
 
 #endif

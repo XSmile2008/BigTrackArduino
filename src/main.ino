@@ -26,46 +26,51 @@ void readCommands() {
     byte b = Serial.read();//read byte
     if (bufferSize > 0) {//if already start parsing command
       buffer[bufferSize++] = b;
-      if ((buffer[bufferSize - 2] == 13) && (buffer[bufferSize - 1] == 10)) {//if find end of command
-        runCommand(new Command(buffer, bufferSize));
+      if ((buffer[bufferSize - 2] == Command::COMMAND_END[0]) && (buffer[bufferSize - 1] == Command::COMMAND_END[1])) {//if find end of command
+        Serial.print(F("FreeMem.onCreate: ")); Serial.println(freeMemory());
+        printBytes(buffer, bufferSize);
+        Command* command = Command::deserialize(buffer, bufferSize);
+        if (command != NULL) runCommand(command);
+        else Serial.println(F("Command is not valid!"));
+        delete command;
+        Serial.print(F("FreeMem.onDestroy: ")); Serial.println(freeMemory());
         bufferSize = 0;
       }
-    } else if (b == ':') {//else start parse new command
+    } else if (b == Command::COMMAND_START[0]) {//else start parse new command
       buffer[bufferSize++] = b;
     }
   }
 }
 
 void runCommand(Command* command) {
-  if (command->isValid()) {
-    switch (command->getKey()) {
-      case STOP : {
-        chassis->stop();
-        break;
-      }
-      case MOVE : {
-        Argument* diraction = command->getArg(DIRACTION);
-        if (*(byte*)diraction->getValue() == FORWARD)
-          chassis->move(FORWARD);
-        else if (*(byte*)diraction->getValue() == BACKWARD)
-          chassis->move(BACKWARD);
-        break;
-      }
-      case ROTATE : {
-        if (command->getArg(AZIMUTH) != NULL) chassis->setAzimuth(*(int16_t*) command->getArg(AZIMUTH)->getValue(), false);
-        else if (command->getArg(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArg(DIRACTION)->getValue());
-        break;
-      }
-      case LIFETEST : {
-        lifeTest();
-        break;
-      }
+  switch (command->getKey()) {
+    case STOP : {
+      chassis->stop();
+      break;
     }
-  } else {
-    Serial.println(F("Command is not valid!"));
+    case MOVE : {
+      Argument* diraction = command->getArgument(DIRACTION);
+      if (diraction != NULL) chassis->move(*(byte*) diraction->getValue());
+      break;
+    }
+    case ROTATE : {
+      if (command->getArgument(AZIMUTH) != NULL) chassis->setAzimuth(*(int16_t*) command->getArgument(AZIMUTH)->getValue(), false);
+      else if (command->getArgument(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArgument(DIRACTION)->getValue());
+      break;
+    }
+    case LIFETEST : {
+      lifeTest();
+      break;
+    }
   }
-  delete(command);
-  Serial.print(F("FreeMem: ")); Serial.println(freeMemory());
+}
+
+void printBytes(byte bytes[], int size) {
+	Serial.print(F("bytes[")); Serial.print(size); Serial.println(F("]: --------------------"));
+	for (int i = 0; i < size; i++) Serial.print((char) bytes[i]);
+	Serial.println();
+	for (int i = 0; i < size; i++) {Serial.print(bytes[i]); Serial.print(F(", "));}
+	Serial.println(F("\r\n--------------------"));
 }
 
 void listTest() {
@@ -120,8 +125,8 @@ void setup() {
   Wire.begin();
   Serial.begin(115200);
   Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
-  //chassis = new Chassis(4, 7, 5, 6);
-  //Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
+  chassis = new Chassis(4, 7, 5, 6);
+  Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
   //lifeTest();
   //listTest();

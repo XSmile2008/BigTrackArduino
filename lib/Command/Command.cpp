@@ -1,71 +1,93 @@
 #include "Command.h"
 #include "ArrayList.cpp"
 
-Command::Command(byte bytes[], int size) {
-	printBytes(bytes, size);
-	int pos = 1;
-	valid = true;
-	key = bytes[pos++];
-	int argsCount = bytes[pos++];
-	args = new ArrayList<Argument*>(argsCount);
-	//for (int i = 0; i < argsCount; i++) args[i] = NULL;
-
-	Serial.print(F("key = ")); Serial.println(key);
-	Serial.print(F("argsCount = ")); Serial.println(argsCount);
-
-	for (int i = 0; i < argsCount; i++) {
-		if (pos + 2 > size - 2) {
-			valid = false;
-			return;
-		}
-		byte argKey = bytes[pos++];
-		byte argSize = bytes[pos++];
-		// if (pos + argSize > size - 2) {
-		// 	valid = false;
-		// 	return;
-		// }
-		args-> add(new Argument(argKey, argSize, &bytes[pos]));
-		args->get(i)->print();
-		pos += argSize;
-		Serial.print(F("pos = ")); Serial.println(pos);
-	}
-}
+const byte Command::COMMAND_START[] = {':'};
+const byte Command::COMMAND_END[] = {'\r', '\n'};
 
 Command::Command(byte key) {
 	Command::key = key;
-	args = new ArrayList<Argument*>();
+	arguments = new ArrayList<Argument*>();
+}
+
+Command::Command(byte key, List<Argument*>* arguments) {
+	Command::key = key;
+	Command::arguments = arguments;
 }
 
 Command::~Command() {
-	for (uint16_t i = 0; i < args->size(); i++) delete args->get(i);
-	delete args;
+	Serial.println(F("Command.destructor()"));
+	for (uint16_t i = 0; i < arguments->size(); i++) delete arguments->get(i);
+	delete arguments;
 }
 
-bool Command::isValid() {
-	return valid;
+void Command::serialize() {//TODO: check on multy argument commands
+	uint8_t size = 3 + 2;
+	for (uint8_t i = 0; i < arguments->size(); i++) size += 2 + arguments->get(i)->getSize();
+	byte bytes[size];
+	bytes[0] = COMMAND_START[0];
+	bytes[1] = key;
+	bytes[2] = arguments->size();
+	uint8_t pos = 3;
+	for (uint8_t i = 0; i < arguments->size(); i++) {
+		bytes[pos++] = arguments->get(i)->getKey();
+		bytes[pos++] = arguments->get(i)->getSize();
+		memcpy(&bytes[pos], arguments->get(i)->getValue(), arguments->get(i)->getSize());
+		pos += arguments->get(i)->getSize();
+	}
+	bytes[size - 2] = COMMAND_END[0];
+	bytes[size - 1] = COMMAND_END[1];
+
+	Serial.println("serialized :");
+	for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(", "); }
+	Serial.println();
+}
+
+Command* Command::deserialize(byte bytes[], int size) {
+	int key = bytes[1];
+	uint8_t argsCount = bytes[2];
+	Serial.print(F("key = ")); Serial.println(key);
+	Serial.print(F("argsCount = ")); Serial.println(argsCount);
+	int pos = 3;
+	List<Argument*>* arguments = new ArrayList<Argument*>(argsCount);
+	for (uint8_t i = 0; i < argsCount; i++) {
+		if (pos + 2 > size - 2) break;
+		byte argKey = bytes[pos++];
+		byte argSize = bytes[pos++];
+		//if (pos + argSize > size - 2) break;
+		arguments->add(new Argument(argKey, argSize, &bytes[pos]));
+		arguments->get(i)->print();
+		pos += argSize;
+		Serial.print(F("pos = ")); Serial.println(pos);
+	}
+	if (arguments->size() == argsCount) {
+		return new Command(key, arguments);
+	} else {
+		for (uint8_t i = 0; i < arguments->size(); i++) delete arguments->get(i);
+		delete arguments;
+		return NULL;
+	}
 }
 
 byte Command::getKey() {
 	return key;
 }
 
-Argument* Command::getArg(byte key) {
-	for (uint8_t i = 0; i < args->size(); i++) {
-		if (args->get(i)->getKey() == key) return args->get(i);
-	}
-	return NULL;
+void Command::setKey(byte key) {
+	Command::key = key;
 }
 
-/**@depreceted*/
-void Command::printBytes(byte bytes[], int size) {
-	Serial.println(F("--------------------"));
-	Serial.print(F("find end of command, command length = ")); Serial.println(size);
-	for (int i = 0; i < size; i++) {
-		Serial.print((char) bytes[i]);
+List<Argument*>* Command::getArguments() {
+	return arguments;
+}
+
+void Command::setArguments(List<Argument*> arguments) {
+	delete Command::arguments;//TODO: check it
+	*Command::arguments = arguments;
+}
+
+Argument* Command::getArgument(byte key) {
+	for (uint8_t i = 0; i < arguments->size(); i++) {
+		if (arguments->get(i)->getKey() == key) return arguments->get(i);
 	}
-	Serial.println();
-	for (int i = 0; i < size; i++) {
-		Serial.print(bytes[i]); Serial.print(", ");
-	}
-	Serial.println(F("\r\n--------------------"));
+	return NULL;
 }

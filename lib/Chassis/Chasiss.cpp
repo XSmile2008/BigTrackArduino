@@ -44,9 +44,19 @@ float e = 3;
 unsigned long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
 	if (millis() > lastTele + 3000) {
+		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
 		lastTele = millis();
-		Serial.print("azimuth = "); Serial.print(compass->getAzimuth());
-		Serial.print(" | target = "); Serial.println(targetAzimuth);
+		float currAzimuth = compass->getAzimuth();
+
+		Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
+		Serial.print(F(" | target = ")); Serial.println(targetAzimuth);
+
+		Command* telemetry = new Command('T');
+		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
+		Serial.println(telemetry->getArguments()->size());
+		telemetry->serialize();
+		delete telemetry;
+		Serial.print(F("FreeMem.onEndTele: ")); Serial.println(freeMemory());
 	}
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
@@ -161,7 +171,7 @@ void Chassis::moveSteps(int diraction, int steps) {//TODO:
 }
 
 void Chassis::setAzimuth(int azimuth, bool lock) {
-	Serial.print("new azimuth = "); Serial.println(azimuth);
+	Serial.print(F("new azimuth = ")); Serial.println(azimuth);
 	Chassis::targetAzimuth = azimuth;
 	Chassis::azimuthLock = lock;
 }
