@@ -11,7 +11,7 @@ class Command {
 		Command(byte key, List<Argument*>* arguments);
 		~Command();
 		void serialize();
-		static Command* deserialize(byte bytes[], int size);
+		static Command* deserialize(byte bytes[], uint16_t size);
 		byte getKey();
 		void setKey(byte key);
 		List<Argument*>* getArguments();
@@ -19,7 +19,12 @@ class Command {
 		Argument* getArgument(byte key);
 
 		static const byte COMMAND_START[];
+		static const uint8_t COMMAND_START_LENGTH;
+
 		static const byte COMMAND_END[];
+		static const uint8_t COMMAND_END_LENGTH;
+
+		static const int EMPTY_COMMAND_LENGTH;
 	private:
 		byte key;
 		List<Argument*>* arguments;

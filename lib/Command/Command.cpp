@@ -1,8 +1,14 @@
 #include "Command.h"
 #include "ArrayList.cpp"
+#include "Argument.h"
 
 const byte Command::COMMAND_START[] = {':'};
+const uint8_t Command::COMMAND_START_LENGTH = 1;
+
 const byte Command::COMMAND_END[] = {'\r', '\n'};
+const uint8_t Command::COMMAND_END_LENGTH = 2;
+
+const int Command::EMPTY_COMMAND_LENGTH = COMMAND_START_LENGTH + 2 + COMMAND_END_LENGTH;
 
 Command::Command(byte key) {
 	Command::key = key;
@@ -21,45 +27,48 @@ Command::~Command() {
 }
 
 void Command::serialize() {//TODO: check on multy argument commands
-	uint8_t size = 3 + 2;
-	for (uint8_t i = 0; i < arguments->size(); i++) size += 2 + arguments->get(i)->getSize();
+	uint8_t size = EMPTY_COMMAND_LENGTH;
+	for (uint8_t i = 0; i < arguments->size(); i++) size += Argument::OFFSET + arguments->get(i)->getSize();
 	byte bytes[size];
-	bytes[0] = COMMAND_START[0];
-	bytes[1] = key;
-	bytes[2] = arguments->size();
-	uint8_t pos = 3;
+	memcpy(bytes, COMMAND_START, COMMAND_START_LENGTH);//TODO: test
+	uint8_t pos = COMMAND_START_LENGTH;
+	bytes[pos++] = key;
+	bytes[pos++] = arguments->size();
 	for (uint8_t i = 0; i < arguments->size(); i++) {
 		bytes[pos++] = arguments->get(i)->getKey();
 		bytes[pos++] = arguments->get(i)->getSize();
 		memcpy(&bytes[pos], arguments->get(i)->getValue(), arguments->get(i)->getSize());
 		pos += arguments->get(i)->getSize();
 	}
-	bytes[size - 2] = COMMAND_END[0];
-	bytes[size - 1] = COMMAND_END[1];
+	memcpy(&bytes[pos], COMMAND_END, COMMAND_END_LENGTH);//TODO: check
 
-	Serial.println("serialized :");
-	for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(", "); }
+	Serial.println(F("serialized :"));
+	for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(F(", ")); }
 	Serial.println();
+	Serial.write(bytes, size);
 }
 
-Command* Command::deserialize(byte bytes[], int size) {
-	int key = bytes[1];
-	uint8_t argsCount = bytes[2];
-	Serial.print(F("key = ")); Serial.println(key);
+Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
+	if (bytesLength < EMPTY_COMMAND_LENGTH) return NULL;
+	uint16_t pos = COMMAND_START_LENGTH;
+	uint8_t key = bytes[pos++];
+	uint8_t argsCount = bytes[pos++];
+
+	Serial.println(bytesLength);	Serial.print(F("key = ")); Serial.println(key);
 	Serial.print(F("argsCount = ")); Serial.println(argsCount);
-	int pos = 3;
+
 	List<Argument*>* arguments = new ArrayList<Argument*>(argsCount);
 	for (uint8_t i = 0; i < argsCount; i++) {
-		if (pos + 2 > size - 2) break;
-		byte argKey = bytes[pos++];
-		byte argSize = bytes[pos++];
-		//if (pos + argSize > size - 2) break;
-		arguments->add(new Argument(argKey, argSize, &bytes[pos]));
+		uint8_t argSize = bytes[pos + Argument::SIZE];
+		if (pos + Argument::OFFSET + argSize + COMMAND_END_LENGTH > bytesLength || argSize < 0) break;
+
+		arguments->add(new Argument(bytes[pos + Argument::KEY], bytes[pos + Argument::SIZE], &bytes[pos + Argument::OFFSET]));
+		pos += Argument::OFFSET + arguments->get(i)->getSize();
+
 		arguments->get(i)->print();
-		pos += argSize;
 		Serial.print(F("pos = ")); Serial.println(pos);
 	}
-	if (arguments->size() == argsCount) {
+	if ((arguments->size() == argsCount) && (pos + COMMAND_END_LENGTH == bytesLength)) {
 		return new Command(key, arguments);
 	} else {
 		for (uint8_t i = 0; i < arguments->size(); i++) delete arguments->get(i);

@@ -82,10 +82,7 @@ bool ArrayList<T>::isEmpty() {
 template< typename T >
 void ArrayList<T>::trimToSize() {
   if (capacity > valuesSize) {
-    T* newValues = new T[valuesSize];
-    memcpy(newValues, values, valuesSize * sizeof(T));
-    delete[] values;
-    values = newValues;
+    values = (T*) realloc(values, valuesSize * sizeof(T));
     capacity = valuesSize;
   }
 }
@@ -107,13 +104,11 @@ void ArrayList<T>::ensureCapacity(uint16_t minCapacity) {
 
 template< typename T >
 void ArrayList<T>::grow(uint16_t minCapacity) {
-  uint16_t newCapacity = capacity + (capacity >> 1);
-  if (newCapacity < minCapacity) newCapacity = minCapacity;
-  T* newValues = new T[newCapacity];
-  memcpy(newValues, values, capacity * sizeof(T));
-  delete[] values;
-  values = newValues;
-  capacity = newCapacity;
+  if (capacity < minCapacity) {
+    capacity += (capacity >> 1);
+    if (capacity < minCapacity) capacity = minCapacity;
+    values = (T*) realloc(values, capacity * sizeof(T));
+  }
 }
 
 //@Deprecated

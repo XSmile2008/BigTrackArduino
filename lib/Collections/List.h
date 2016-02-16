@@ -15,7 +15,6 @@ class List {
 
     virtual uint16_t size() {return (uint16_t) NULL;};
     virtual bool isEmpty() {return (bool) NULL;};
-    virtual void print() {};//TODO: may be @Deprecated
   private:
 };
 
