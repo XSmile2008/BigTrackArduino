@@ -41,23 +41,8 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 }
 
 float e = 3;
-unsigned long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::task() {
-	if (millis() > lastTele + 3000) {
-		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
-		lastTele = millis();
-		float currAzimuth = compass->getAzimuth();
-
-		Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
-		Serial.print(F(" | target = ")); Serial.println(targetAzimuth);
-
-		Command* telemetry = new Command('T');
-		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
-		Serial.println(telemetry->getArguments()->size());
-		telemetry->serialize();
-		delete telemetry;
-		Serial.print(F("FreeMem.onEndTele: ")); Serial.println(freeMemory());
-	}
+	// telemetry();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
 			rotateTo(targetAzimuth);
@@ -65,7 +50,26 @@ void Chassis::task() {
 	}
 }
 
+unsigned long lastTele = 0;//TODO: check if millis() is 0
+void Chassis::telemetry() {
+	if (millis() > lastTele + 3000) {
+		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
+		lastTele = millis();
+		float currAzimuth = compass->getAzimuth();
+
+		// Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
+		// Serial.print(F(" | target = ")); Serial.println(targetAzimuth);
+
+		Command* telemetry = new Command('T');
+		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
+		telemetry->serialize();
+		delete telemetry;
+		Serial.print(F("FreeMem.onEndTele: ")); Serial.println(freeMemory());
+	}
+}
+
 void Chassis::setMotorLeft(int pwm) {
+	Serial.print("PWMLeft = "); Serial.println(pwm);
 	pwmLeft = pwm;
 	if (pwm >= 0) {
 		digitalWrite(pinDirLeft, LOW);
@@ -77,6 +81,7 @@ void Chassis::setMotorLeft(int pwm) {
 }
 
 void Chassis::setMotorRight(int pwm) {
+	Serial.print("PWMRight = "); Serial.println(pwm);
 	pwmRight = pwm;
 	if (pwm >= 0) {
 		digitalWrite(pinDirRight, LOW);
@@ -104,19 +109,21 @@ void Chassis::countStepsR() {
 	Serial.print("stepsRight = "); Serial.println(stepsRight);
 
 	if (stepLastMillisRight > 0) {
-		int stepCurrMillisLeft = millis();
-		stepTimeLeft = stepCurrMillisLeft - stepLastMillisLeft;
-		stepLastMillisLeft = stepCurrMillisLeft;
+		int stepCurrMillisRight = millis();
+		stepTimeRight = stepCurrMillisRight - stepLastMillisRight;
+		stepLastMillisRight = stepCurrMillisRight;
 		checkSteps();
 	} else stepLastMillisRight = millis();
 }
 
 void Chassis::checkSteps() {
+	Serial.print("stepTimeLeft = "); Serial.println(stepTimeLeft);
+	Serial.print("stepTimeRight = "); Serial.println(stepTimeRight);
 	if (stepTimeLeft > stepTimeRight) {
-		setMotorLeft(map(stepTimeRight, 0, stepTimeLeft, 0, 255) * (pwmLeft = 0 ? 0 : pwmLeft > 0 ? 1 : -1));
+		setMotorLeft(map(stepTimeRight, 0, stepTimeLeft, 0, 255) * (pwmLeft == 0 ? 0 : pwmLeft > 0 ? 1 : -1));
 		setMotorRight(pwmRight == 0 ? 0 : (pwmRight > 0 ? 255 : -255));
 	} else {
-		setMotorRight(map(stepTimeLeft, 0, stepTimeRight, 0, 255) * (pwmRight = 0 ? 0 : pwmRight > 0 ? 1 : -1));
+		setMotorRight(map(stepTimeLeft, 0, stepTimeRight, 0, 255) * (pwmRight == 0 ? 0 : pwmRight > 0 ? 1 : -1));
 		setMotorLeft(pwmLeft == 0 ? 0 : (pwmLeft > 0 ? 255 : -255));
 	}
 }

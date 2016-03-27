@@ -27,7 +27,7 @@ Command* Parser::parse(byte* data, uint8_t dataLength) {
   }
 
   Serial.println("Buffer:");
-  for (int i = 0; i < bufferLength; i++) {Serial.print(buffer[i]); Serial.print(F(", "));}//TODO: remove
+  for (int i = 0; i < bufferLength; i++) {Serial.print(buffer[i]); Serial.print(F(", "));}Serial.println();//TODO: remove
 
 
   for (int start = searchStart(0); start != NOT_FIND; start = searchStart(start + 1)) {
@@ -36,11 +36,14 @@ Command* Parser::parse(byte* data, uint8_t dataLength) {
       Command* command = Command::deserialize(buffer + start, end - start + 1);
       if (command != NULL) {
         Serial.println(bufferLength);
-        uint8_t from = end + (end < bufferLength - 1 ? 1 : 0);
+        uint8_t from = end + 1;//(end < bufferLength - 1 ? 1 : 0);
         uint8_t to = bufferLength - 1;
         bufferLength = to - from + 1;
-        buffer = (byte*) realloc(buffer, bufferLength);
         memcpy(buffer, buffer + from, bufferLength);
+        buffer = (byte*) realloc(buffer, bufferLength);
+
+        Serial.print("from = "); Serial.print(from); Serial.print(" | to = "); Serial.println(to);
+        Serial.println("NewBuffer:");        for (int i = 0; i < bufferLength; i++) {Serial.print(buffer[i]); Serial.print(F(", "));}Serial.println();//TODO: remove
         return command;
       }
     }

@@ -8,14 +8,20 @@
 Chassis* chassis = NULL;
 
 Parser parser = Parser();
-void readCommands() {
-  if (Serial.available()) {
+void serialEvent() {
+  while (Serial.available()) {
     Serial.print(F("FreeMem.onCreate: ")); Serial.println(freeMemory());
+    Serial.println(Serial.available());
+
     int dataLength = Serial.available();
-    uint8_t* data = (uint8_t*) Serial.readBytes(new uint8_t[dataLength], dataLength);
+    byte* data = new byte[dataLength];
+    Serial.readBytes(data, dataLength);
+
     Command* command = parser.parse(data, dataLength);
     if (command != NULL) runCommand(command);
     else Serial.println(F("Command is not valid!"));
+
+    delete[] data;
     delete command;
     Serial.print(F("FreeMem.onDestroy: ")); Serial.println(freeMemory());
   }
@@ -51,10 +57,9 @@ void setup() {
   chassis = new Chassis(4, 7, 5, 6);
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   //chassis->test();
-  Tests::commandTest();
+  //Tests::commandTest();
 }
 
 void loop() {
-  //readCommands();
-  //chassis->task();
+  chassis->task();
 }

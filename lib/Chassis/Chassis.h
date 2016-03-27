@@ -14,6 +14,7 @@ class Chassis {
 public:
 	Chassis(int pinDirL, int pinDirR, int pinPwmL, int pinPwmR);
 	void task();
+	void telemetry();
 
 	static void setMotorLeft(int pwm);
 	static void setMotorRight(int pwm);

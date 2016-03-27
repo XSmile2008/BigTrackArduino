@@ -2,8 +2,8 @@
 #include "ArrayList.cpp"
 #include "Argument.h"
 
-const byte Command::COMMAND_START[] = {':'};
-const uint8_t Command::COMMAND_START_LENGTH = 1;
+const byte Command::COMMAND_START[] = {':', ':'};
+const uint8_t Command::COMMAND_START_LENGTH = 2;
 
 const byte Command::COMMAND_END[] = {'\r', '\n'};
 const uint8_t Command::COMMAND_END_LENGTH = 2;
@@ -21,7 +21,7 @@ Command::Command(byte key, List<Argument*>* arguments) {
 }
 
 Command::~Command() {
-	Serial.println(F("Command.destructor()"));
+	// Serial.println(F("Command.destructor()"));
 	for (uint16_t i = 0; i < arguments->size(); i++) delete arguments->get(i);
 	delete arguments;
 }
@@ -42,9 +42,9 @@ void Command::serialize() {//TODO: check on multy argument commands
 	}
 	memcpy(&bytes[pos], COMMAND_END, COMMAND_END_LENGTH);//TODO: check
 
-	Serial.println(F("serialized :"));
-	for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(F(", ")); }
-	Serial.println();
+	// Serial.println(F("serialized :"));
+	// for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(F(", ")); }
+	// Serial.println();
 	Serial.write(bytes, size);
 }
 
@@ -54,8 +54,8 @@ Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
 	uint8_t key = bytes[pos++];
 	uint8_t argsCount = bytes[pos++];
 
-	Serial.println(bytesLength);	Serial.print(F("key = ")); Serial.println(key);
-	Serial.print(F("argsCount = ")); Serial.println(argsCount);
+	// Serial.println(bytesLength);	Serial.print(F("key = ")); Serial.print(key);
+	// Serial.print(F(" | argsCount = ")); Serial.println(argsCount);
 
 	List<Argument*>* arguments = new ArrayList<Argument*>(argsCount);
 	for (uint8_t i = 0; i < argsCount; i++) {
@@ -65,8 +65,7 @@ Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
 		arguments->add(new Argument(bytes[pos + Argument::KEY], bytes[pos + Argument::SIZE], &bytes[pos + Argument::OFFSET]));
 		pos += Argument::OFFSET + arguments->get(i)->getSize();
 
-		arguments->get(i)->print();
-		Serial.print(F("pos = ")); Serial.println(pos);
+		// arguments->get(i)->print();
 	}
 	if ((arguments->size() == argsCount) && (pos + COMMAND_END_LENGTH == bytesLength)) {
 		return new Command(key, arguments);

@@ -62,8 +62,13 @@ void Tests::commandTest() {
   Serial.print(F("start of test: ")); Serial.println(freeMemory());
 
   Parser* parser = new Parser();
-  const uint8_t dataLength = 14;
-  byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,5,11,12, 13,10, 13,10};
+
+  const uint8_t dataLength = 21;
+  byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10, 100, 100, 100, 100, 58,97,0,13,10};
+
+  // const uint8_t dataLength = 12;
+  // byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
+
   //byte* data = new byte[dataLength] {58, 100, 0, 13,10};
   Command* command = parser->parse(data, dataLength);
   if (command != NULL) {
