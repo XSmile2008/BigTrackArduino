@@ -30,7 +30,7 @@ void Motor::handleStep() {
   steps++;
 	if (stepLastMillis > 0) {
 		int stepCurrMillis = millis();
-		stepTime = stepCurrMillis - stepLastMillis;
+		stepTime = (stepTime + stepCurrMillis - stepLastMillis)/2;
 		stepLastMillis = stepCurrMillis;
 	} else stepLastMillis = millis();
 }
@@ -67,4 +67,12 @@ int Motor::getSteps() {
 
 void Motor::setSteps(int steps) {
   this->steps = steps;
+}
+
+int Motor::getStepTime() {
+  return stepTime;
+}
+
+void Motor::setStepTime(int stepTime) {
+  this->stepTime = stepTime;
 }

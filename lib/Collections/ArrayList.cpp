@@ -123,15 +123,3 @@ void ArrayList<T>::print() {
   }
   Serial.println(F("\n-------------------"));
 }
-
-// template<>
-// void ArrayList<int>::print() {
-//   Serial.println(F("-------------------"));
-//   Serial.print(F("RAM: ")); Serial.println(freeMemory());
-//   Serial.print(F("Capacity: ")); Serial.print(capacity);
-//   Serial.print(F(" | size = ")); Serial.println(valuesSize);
-//   for (uint16_t i = 0; i < valuesSize; i++) {
-//     Serial.print(F("@")); Serial.print((uint16_t) &values[i]); Serial.print(F(" = ")); Serial.print(values[i]); Serial.print(F(", "));
-//   }
-//   Serial.println(F("\n-------------------"));
-// }

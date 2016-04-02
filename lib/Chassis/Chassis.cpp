@@ -22,7 +22,7 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 float e = 3;
 void Chassis::task() {
 	// telemetry();
-	checkSteps();
+	checkMotorsSpeed();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
 			rotateTo(targetAzimuth);
@@ -58,25 +58,24 @@ void Chassis::countStepsR() {
 	Serial.print("stepsRight = "); Serial.println(motorRight->getSteps());
 }
 
-unsigned long lastCheckSteps = 0;//TODO: check if millis() is 0
-uint8_t minPwm = 0;
-void Chassis::checkSteps() {
-	if (millis() > lastCheckSteps + 500) {
-		lastCheckSteps = millis();
-		int stepsL = motorLeft->getSteps();
-		int stepsR = motorRight->getSteps();
-		int pwmL = motorLeft->getPwm();
-		int pwmR = motorRight->getPwm();
-		if (stepsL > stepsR) {
-			motorLeft->setPwm((pwmL + map(stepsR, -1, stepsL, minPwm, 255))/2);
-			motorRight->setPwm(255);
-		} else if (stepsL < stepsR) {
-			motorRight->setPwm((pwmR + map(stepsL, -1, stepsR, minPwm, 255))/2);
-			motorLeft->setPwm(255);
+unsigned long lastCheckMotorsSpeed = 0;//TODO: check if millis() is 0
+void Chassis::checkMotorsSpeed() {
+	if (millis() > lastCheckMotorsSpeed + 500) {
+		lastCheckMotorsSpeed = millis();
+		if (motorLeft->getStepTime() < motorRight->getStepTime() && motorLeft->getSteps()() != 0) {//TODO
+			equalizeMotorsSpeed(motorRight, motorLeft);
+		} else if (motorLeft->getStepTime() > motorRight->getStepTime() && motorRight->getSteps() != 0) {//TODO
+			equalizeMotorsSpeed(motorLeft, motorRight);
 		}
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
 	}
+}
+
+uint8_t minPwm = 50;
+void Chassis::equalizeMotorsSpeed(Motor* slower, Motor* faster) {
+	faster->setPwm(map(faster->getStepTime(), 0, slower->getStepTime(), minPwm, 255));
+	slower->setPwm(255);
 }
 
 void Chassis::test() {

@@ -17,6 +17,9 @@ class Motor {
 
     int getSteps();
     void setSteps(int steps);
+
+    int getStepTime();
+    void setStepTime(int stepTime);
   private:
     void changeSpeed();
 
