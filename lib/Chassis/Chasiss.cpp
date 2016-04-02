@@ -22,6 +22,7 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 float e = 3;
 void Chassis::task() {
 	// telemetry();
+	checkSteps();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
 			rotateTo(targetAzimuth);
@@ -32,8 +33,8 @@ void Chassis::task() {
 unsigned long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::telemetry() {
 	if (millis() > lastTele + 3000) {
-		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
 		lastTele = millis();
+		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
 		float currAzimuth = compass->getAzimuth();
 
 		// Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
@@ -50,25 +51,32 @@ void Chassis::telemetry() {
 void Chassis::countStepsL() {
 	motorLeft->handleStep();
 	Serial.print("stepsLeft = "); Serial.println(motorLeft->getSteps());
-	checkSteps();
 }
 
 void Chassis::countStepsR() {
 	motorRight->handleStep();
 	Serial.print("stepsRight = "); Serial.println(motorRight->getSteps());
-	checkSteps();
 }
 
+unsigned long lastCheckSteps = 0;//TODO: check if millis() is 0
+uint8_t minPwm = 150;
 void Chassis::checkSteps() {
-	// Serial.print("stepTimeLeft = "); Serial.println(stepTimeLeft);
-	// Serial.print("stepTimeRight = "); Serial.println(stepTimeRight);
-	// if (stepTimeLeft > stepTimeRight) {
-	// 	setMotorLeft(map(stepTimeRight, 0, stepTimeLeft, 0, 255) * (pwmLeft == 0 ? 0 : pwmLeft > 0 ? 1 : -1));
-	// 	setMotorRight(pwmRight == 0 ? 0 : (pwmRight > 0 ? 255 : -255));
-	// } else {
-	// 	setMotorRight(map(stepTimeLeft, 0, stepTimeRight, 0, 255) * (pwmRight == 0 ? 0 : pwmRight > 0 ? 1 : -1));
-	// 	setMotorLeft(pwmLeft == 0 ? 0 : (pwmLeft > 0 ? 255 : -255));
-	// }
+	if (millis() > lastCheckSteps + 500) {
+		lastCheckSteps = millis();
+		int stepsL = motorLeft->getSteps();
+		int stepsR = motorRight->getSteps();
+		int pwmL = motorLeft->getPwm();
+		int pwmR = motorRight->getPwm();
+		if (stepsL > stepsR) {
+			motorLeft->setPwm(map(stepsR, -1, stepsL, minPwm, 255) * (pwmL == 0 ? 0 : pwmL > 0 ? 1 : -1));
+			motorRight->setPwm(pwmR == minPwm ? minPwm : (pwmR > minPwm ? 255 : -255));
+		} else if (stepsL < stepsR) {
+			motorRight->setPwm(map(stepsL, -1, stepsR, minPwm, 255) * (pwmR == 0 ? 0 : pwmR > 0 ? 1 : -1));
+			motorLeft->setPwm(pwmL == minPwm ? minPwm : (pwmL > minPwm ? 255 : -255));
+		}
+		motorLeft->setSteps(0);
+		motorRight->setSteps(0);
+	}
 }
 
 void Chassis::test() {

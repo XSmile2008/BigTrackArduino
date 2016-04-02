@@ -6,9 +6,12 @@ class Motor {
   public:
     Motor(int pinDir, int pwmPin);
     void handleStep();
-    void setPwm(int pwm);
+
     int getPwm();
+    void setPwm(int pwm);
+
     int getSteps();
+    void setSteps(int steps);
   private:
     int pwm;
 

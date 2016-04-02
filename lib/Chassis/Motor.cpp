@@ -22,6 +22,10 @@ void Motor::handleStep() {
 	} else stepLastMillis = millis();
 }
 
+int Motor::getPwm() {
+  return pwm;
+}
+
 void Motor::setPwm(int pwm) {
 	Serial.print("PWM"); Serial.print((int)this); Serial.print(" = "); Serial.println(pwm);
 	this->pwm = pwm;
@@ -34,10 +38,10 @@ void Motor::setPwm(int pwm) {
 	}
 }
 
-int Motor::getPwm() {
-  return pwm;
-}
-
 int Motor::getSteps() {
   return steps;
+}
+
+void Motor::setSteps(int steps) {
+  this->steps = steps;
 }
