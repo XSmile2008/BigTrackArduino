@@ -2,6 +2,7 @@
 #define Chassis_h
 #include "Arduino.h"
 #include "HMC5883L.h"
+#include "Motor.h"
 #include "Command.h"
 //#include "Commands.h"
 
@@ -15,9 +16,6 @@ public:
 	Chassis(int pinDirL, int pinDirR, int pinPwmL, int pinPwmR);
 	void task();
 	void telemetry();
-
-	static void setMotorLeft(int pwm);
-	static void setMotorRight(int pwm);
 
 	void test();
 	void stop();
@@ -37,26 +35,11 @@ private:
 	static void checkSteps();
 
 //variables
-	static int stepsLeft;
-	static int stepsRight;
-
-	static int stepLastMillisLeft;
-	static int stepLastMillisRight;
-
-	static int stepTimeLeft;
-	static int stepTimeRight;
-
-	static int pwmLeft;
-	static int pwmRight;
-
-	static int pinDirLeft;
-	static int pinDirRight;
-	static int pinPwmLeft;
-	static int pinPwmRight;
-
 	static int targetAzimuth;
 	static bool azimuthLock;
 
+	static Motor* motorLeft;
+	static Motor* motorRight;
 	static HMC5883L* compass;
 };
 
