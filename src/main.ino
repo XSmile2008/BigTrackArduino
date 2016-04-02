@@ -56,7 +56,7 @@ void setup() {
   Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
   chassis = new Chassis(4, 7, 5, 6);
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
-  //chassis->test();
+  // chassis->test();
   //Tests::commandTest();
 }
 

@@ -59,7 +59,7 @@ void Chassis::countStepsR() {
 }
 
 unsigned long lastCheckSteps = 0;//TODO: check if millis() is 0
-uint8_t minPwm = 150;
+uint8_t minPwm = 0;
 void Chassis::checkSteps() {
 	if (millis() > lastCheckSteps + 500) {
 		lastCheckSteps = millis();
@@ -68,11 +68,11 @@ void Chassis::checkSteps() {
 		int pwmL = motorLeft->getPwm();
 		int pwmR = motorRight->getPwm();
 		if (stepsL > stepsR) {
-			motorLeft->setPwm(map(stepsR, -1, stepsL, minPwm, 255) * (pwmL == 0 ? 0 : pwmL > 0 ? 1 : -1));
-			motorRight->setPwm(pwmR == minPwm ? minPwm : (pwmR > minPwm ? 255 : -255));
+			motorLeft->setPwm((pwmL + map(stepsR, -1, stepsL, minPwm, 255))/2);
+			motorRight->setPwm(255);
 		} else if (stepsL < stepsR) {
-			motorRight->setPwm(map(stepsL, -1, stepsR, minPwm, 255) * (pwmR == 0 ? 0 : pwmR > 0 ? 1 : -1));
-			motorLeft->setPwm(pwmL == minPwm ? minPwm : (pwmL > minPwm ? 255 : -255));
+			motorRight->setPwm((pwmR + map(stepsL, -1, stepsR, minPwm, 255))/2);
+			motorLeft->setPwm(255);
 		}
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
@@ -81,46 +81,41 @@ void Chassis::checkSteps() {
 
 void Chassis::test() {
 	int d = 3000;
-	Serial.println(F("Left forward:"));
 	motorLeft->setPwm(255);
-	delay(d);
-	Serial.println(F("Left backward:"));
-	motorLeft->setPwm(-255);
-	delay(d);
-	motorLeft->setPwm(0);
+	Serial.println(F("Left forward:"));  motorLeft->setDir(1); delay(d);
+	Serial.println(F("Left backward:")); motorLeft->setDir(-1); delay(d);
+	motorLeft->setDir(0);
 
-	Serial.println(F("Right forward:"));
 	motorRight->setPwm(255);
-	delay(d);
-	Serial.println(F("Right backward:"));
-	motorRight->setPwm(-255);
-	delay(d);
-	motorRight->setPwm(0);
+	Serial.println(F("Right forward:"));  motorRight->setDir(1); delay(d);
+	Serial.println(F("Right backward:")); motorRight->setDir(-1); delay(d);
+	motorRight->setDir(0);
 
-	for (int pwm = -255; pwm <= 255; pwm++) {
-		motorLeft->setPwm(pwm);
-		motorRight->setPwm(pwm);
-		Serial.println(pwm);
-		delay(100);
+	for (int dir = 0; dir <=1; dir ++) {
+		motorLeft->setDir(dir > 0 ? 1 : -1);
+		motorRight->setDir(dir > 0 ? 1 : -1);
+		for (int pwm = 0; pwm <= 255; pwm++) {
+			motorLeft->setPwm(pwm);
+			motorRight->setPwm(pwm);
+			Serial.println(pwm);
+			delay(100);
+		}
 	}
 
 	stop();
 }
 
 void Chassis::stop() {
-	motorLeft->setPwm(0);
-	motorRight->setPwm(0);
+	motorLeft->stop();
+	motorRight->stop();
 }
 
 void Chassis::move(int diraction) {
 	stop();
-	if (diraction == FORWARD) {
-		motorLeft->setPwm(255);
-		motorRight->setPwm(255);
-	} else {
-		motorLeft->setPwm(-255);
-		motorRight->setPwm(-255);
-	}
+	motorLeft->setPwm(255);
+	motorRight->setPwm(255);
+	motorLeft->setDir(diraction == FORWARD ? 1 : -1);
+	motorRight->setDir(diraction == FORWARD ? 1 : -1);
 }
 
 void Chassis::moveSteps(int diraction, int steps) {//TODO:
@@ -135,13 +130,10 @@ void Chassis::setAzimuth(int azimuth, bool lock) {
 }
 
 void Chassis::rotate(int diraction) {
-	if (diraction == LEFT) {
-		motorLeft->setPwm(-255);
-		motorRight->setPwm(255);
-	} else if (diraction == RIGHT) {
-		motorLeft->setPwm(255);
-		motorRight->setPwm(-255);
-	}
+	motorLeft->setPwm(255);
+	motorRight->setPwm(255);
+	motorLeft->setDir(diraction == LEFT ? -1 : 1);
+	motorRight->setDir(diraction == LEFT ? 1 : -1);
 }
 
 void Chassis::rotateTo(int targetAzimuth) {

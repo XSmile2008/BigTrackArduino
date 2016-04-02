@@ -13,6 +13,19 @@ Motor::Motor(int pinDir, int pinPwm) {
   this->stepLastMillis = 0;
 }
 
+void Motor::changeSpeed() {
+  if (dir > 0) {
+		digitalWrite(pinDir, LOW);
+		analogWrite(pinPwm, pwm);
+	} else if (dir < 0) {
+		digitalWrite(pinDir, HIGH);
+		analogWrite(pinPwm, 255 - pwm);
+	} else {
+    digitalWrite(pinDir, LOW);
+    digitalWrite(pinPwm, LOW);
+  }
+}
+
 void Motor::handleStep() {
   steps++;
 	if (stepLastMillis > 0) {
@@ -22,6 +35,22 @@ void Motor::handleStep() {
 	} else stepLastMillis = millis();
 }
 
+void Motor::stop() {
+  dir = 0;
+  pwm = 0;
+  digitalWrite(pinDir, LOW);
+  digitalWrite(pinPwm, LOW);
+}
+
+int Motor::getDir() {
+  return dir;
+}
+
+void Motor::setDir(int dir) {
+  this->dir = dir;
+  changeSpeed();
+}
+
 int Motor::getPwm() {
   return pwm;
 }
@@ -29,13 +58,7 @@ int Motor::getPwm() {
 void Motor::setPwm(int pwm) {
 	Serial.print("PWM"); Serial.print((int)this); Serial.print(" = "); Serial.println(pwm);
 	this->pwm = pwm;
-	if (pwm >= 0) {
-		digitalWrite(pinDir, LOW);
-		analogWrite(pinPwm, pwm);
-	} else {
-		digitalWrite(pinDir, HIGH);
-		analogWrite(pinPwm, 255 + pwm);
-	}
+  changeSpeed();
 }
 
 int Motor::getSteps() {
