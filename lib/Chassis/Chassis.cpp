@@ -62,7 +62,7 @@ unsigned long lastCheckMotorsSpeed = 0;//TODO: check if millis() is 0
 void Chassis::checkMotorsSpeed() {
 	if (millis() > lastCheckMotorsSpeed + 500) {
 		lastCheckMotorsSpeed = millis();
-		if (motorLeft->getStepTime() < motorRight->getStepTime() && motorLeft->getSteps()() != 0) {//TODO
+		if (motorLeft->getStepTime() < motorRight->getStepTime() && motorLeft->getSteps() != 0) {//TODO
 			equalizeMotorsSpeed(motorRight, motorLeft);
 		} else if (motorLeft->getStepTime() > motorRight->getStepTime() && motorRight->getSteps() != 0) {//TODO
 			equalizeMotorsSpeed(motorLeft, motorRight);

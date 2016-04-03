@@ -23,7 +23,6 @@ class ArrayList : public List<T> {
     //@Deprecated
     void print();
   private:
-
     bool rangeCheck(uint16_t index);
     void ensureCapacity(uint16_t index);
     void grow(uint16_t minCapacity);

@@ -58,6 +58,7 @@ void setup() {
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   // chassis->test();
   //Tests::commandTest();
+  Tests::circularBufferTest();
 }
 
 void loop() {

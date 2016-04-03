@@ -1,16 +1,14 @@
-#ifndef CircleBuffer_h
-#define CircleBuffer_h
-#include "List.h"
+#ifndef CircularBuffer_h
+#define CircularBuffer_h
+#include "Arduino.h"
 
 template<typename T>
-class ArrayList : public List<T> {
+class CircularBuffer {
   public:
-    ArrayList();
-    ArrayList(uint16_t initialCapacity);
-    ~ArrayList();
+    CircularBuffer(uint16_t capacity);
+    ~CircularBuffer();
 
-    void add(T item);
-    void add(uint16_t index, T item);
+    void put(T item);
     T set(uint16_t index, T item);
     T get(uint16_t index);
     T remove(uint16_t index);
@@ -18,21 +16,18 @@ class ArrayList : public List<T> {
 
     uint16_t size();
     bool isEmpty();
-    void trimToSize();
 
-    //@Deprecated
-    void print();
+    void print();//@Deprecated
   private:
-
+    uint16_t getAbsoluteIndex(uint16_t index);
+    uint16_t getRelativeIndex(uint16_t index);
     bool rangeCheck(uint16_t index);
-    void ensureCapacity(uint16_t index);
-    void grow(uint16_t minCapacity);
 
+    uint16_t start;
+    uint16_t end;
     uint16_t capacity;
     uint16_t valuesSize;
     T* values;
-
-    static const uint8_t DEFAULT_CAPACITY = 1;
 };
 
 #endif
