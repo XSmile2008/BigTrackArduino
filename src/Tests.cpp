@@ -59,7 +59,7 @@ void Tests::listTest() {
 
 void Tests::circularBufferTest() {
   Serial.print(F("Free memory before test: ")); Serial.println(freeMemory());
-  CircularBuffer<int> *buffer =  new CircularBuffer<int>(3);
+  CircularBuffer<int> *buffer =  new CircularBuffer<int>(5);
   buffer->put(5);
   buffer->put(3);
   buffer->put(10);
@@ -68,13 +68,38 @@ void Tests::circularBufferTest() {
   buffer->put(1);
   buffer->put(9);
   buffer->put(0);
-  Serial.println(F("Circular buffer test: "));
-  for (int i = 0; i < buffer->size(); i++) {
-    Serial.print(buffer->get(i)); Serial.print(F(", "));
-  } Serial.println();
+
   buffer->print();
+
+  Serial.println(F("after remove [1]"));
+  buffer->remove(1);
+  buffer->print();
+
+  Serial.println(F("after put 11"));
+  buffer->put(11);
+  buffer->print();
+
+  Serial.print(F("popStart = ")); Serial.println(buffer->popStart());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.println(F("after remove [2]"));
+  buffer->remove(2);
+  buffer->print();
+
   delete buffer;
-  Serial.print(F("Free memory before after test: ")); Serial.println(freeMemory());
+  Serial.println(F("Free memory before after test: ")); Serial.println(freeMemory());
 }
 
 void Tests::commandTest() {

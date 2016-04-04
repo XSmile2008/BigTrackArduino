@@ -12,6 +12,8 @@ class CircularBuffer {
     T set(uint16_t index, T item);
     T get(uint16_t index);
     T remove(uint16_t index);
+    T popStart();
+    T popEnd();
     void clear();
 
     uint16_t size();
@@ -19,6 +21,8 @@ class CircularBuffer {
 
     void print();//@Deprecated
   private:
+    void dec(uint16_t* pointer);
+    void inc(uint16_t* pointer);
     uint16_t getAbsoluteIndex(uint16_t index);
     uint16_t getRelativeIndex(uint16_t index);
     bool rangeCheck(uint16_t index);
