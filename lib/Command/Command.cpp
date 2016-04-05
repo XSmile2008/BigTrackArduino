@@ -1,6 +1,5 @@
 #include "Command.h"
 #include "ArrayList.cpp"
-#include "Argument.h"
 
 const byte Command::COMMAND_START[] = {':', ':'};
 const uint8_t Command::COMMAND_START_LENGTH = 2;

@@ -1,4 +1,5 @@
 #include "Chassis.h"
+#include "CircularBuffer.cpp"//To stack overflow
 
 int Chassis::targetAzimuth = -1;
 bool Chassis::azimuthLock = false;
@@ -48,6 +49,10 @@ void Chassis::telemetry() {
 	}
 }
 
+/*vvvvvvvvvvvvvvvvvvvvvvvvvvvv
+ * Motor control section start
+ */
+
 void Chassis::countStepsL() {
 	motorLeft->handleStep();
 	Serial.print("stepsLeft = "); Serial.println(motorLeft->getSteps());
@@ -58,21 +63,29 @@ void Chassis::countStepsR() {
 	Serial.print("stepsRight = "); Serial.println(motorRight->getSteps());
 }
 
+CircularBuffer<int8_t>* journal = new CircularBuffer<int8_t>(50);
+uint8_t minPwm = 50;
 unsigned long lastCheckMotorsSpeed = 0;//TODO: check if millis() is 0
 void Chassis::checkMotorsSpeed() {
 	if (millis() > lastCheckMotorsSpeed + 500) {
 		lastCheckMotorsSpeed = millis();
 		if (motorLeft->getStepTime() < motorRight->getStepTime() && motorLeft->getSteps() != 0) {//TODO
 			equalizeMotorsSpeed(motorRight, motorLeft);
+			journal->put(-1);
 		} else if (motorLeft->getStepTime() > motorRight->getStepTime() && motorRight->getSteps() != 0) {//TODO
 			equalizeMotorsSpeed(motorLeft, motorRight);
+			journal->put(1);
+		} else {
+			journal->put(0);
+		}
+		if (journal->size() == 50) {//TODO
+			journal->print();
 		}
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
 	}
 }
 
-uint8_t minPwm = 50;
 void Chassis::equalizeMotorsSpeed(Motor* slower, Motor* faster) {
 	faster->setPwm(map(faster->getStepTime(), 0, slower->getStepTime(), minPwm, 255));
 	slower->setPwm(255);
@@ -117,22 +130,21 @@ void Chassis::move(int diraction) {
 	motorRight->setDir(diraction == FORWARD ? 1 : -1);
 }
 
-void Chassis::moveSteps(int diraction, int steps) {//TODO:
-	stop();
-	move(diraction);
-}
-
-void Chassis::setAzimuth(int azimuth, bool lock) {
-	Serial.print(F("new azimuth = ")); Serial.println(azimuth);
-	Chassis::targetAzimuth = azimuth;
-	Chassis::azimuthLock = lock;
-}
-
 void Chassis::rotate(int diraction) {
 	motorLeft->setPwm(255);
 	motorRight->setPwm(255);
 	motorLeft->setDir(diraction == LEFT ? -1 : 1);
 	motorRight->setDir(diraction == LEFT ? 1 : -1);
+}
+
+/*
+ * Motor control section end
+ *^^^^^^^^^^^^^^^^^^^^^^^^^^*/
+
+void Chassis::setAzimuth(int azimuth, bool lock) {
+	Serial.print(F("new azimuth = ")); Serial.println(azimuth);
+	Chassis::targetAzimuth = azimuth;
+	Chassis::azimuthLock = lock;
 }
 
 void Chassis::rotateTo(int targetAzimuth) {

@@ -4,8 +4,15 @@
 #include "Commands.h"
 #include "Parser.h"
 #include "Tests.h"
+#include "NewPing.h"//TODO: remove
+
+//TODO: refactoring Parser
+//TODO: try use structs to return array and array size
 
 Chassis* chassis = NULL;
+
+NewPing sonar_1 = NewPing(10, 11);
+NewPing sonar_2 = NewPing(12, 13);
 
 Parser parser = Parser();
 void serialEvent() {
@@ -57,10 +64,13 @@ void setup() {
   chassis = new Chassis(4, 7, 5, 6);
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   // chassis->test();
-  //Tests::commandTest();
-  Tests::circularBufferTest();
+  // Tests::commandTest();
+  // Tests::circularBufferTest();
 }
 
 void loop() {
-  chassis->task();
+  // chassis->task();
+  Serial.print("distance_1 = "); Serial.println(sonar_1.ping_cm());
+  Serial.print("distance_2 = "); Serial.println(sonar_2.ping_cm());
+  delay(500);
 }

@@ -9,7 +9,7 @@ Parser::~Parser() {
   delete[] buffer;
 }
 
-Command* Parser::parse(byte* data, uint8_t dataLength) {
+Command* Parser::parse(byte* data, uint8_t dataLength) {//TODO: refactoring, return list of commands!!!
   if (bufferLength == 0) {
     for (int i = 0; i < dataLength; i++) {
       if (data[i] == Command::COMMAND_START[0]) {

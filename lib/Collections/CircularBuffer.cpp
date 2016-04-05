@@ -141,11 +141,9 @@ void CircularBuffer<T>::print(){
   } Serial.println();
 
   Serial.println(F("Root data: "));
-  Serial.print(*(int*)(&values[0] - sizeof(T))); Serial.print(F("| "));
   for (uint8_t i = 0; i < capacity; i++) {
     Serial.print(values[i]); Serial.print(F(", "));
   }
-  Serial.print(F("| ")); Serial.print(*(int*)(&values[capacity - 1] + sizeof(T)));
   Serial.println();
   Serial.print(F("start = ")); Serial.print(start); Serial.print(F(", end = ")); Serial.print(end); Serial.print(F(", size = ")); Serial.println(valuesSize);
   Serial.println();
