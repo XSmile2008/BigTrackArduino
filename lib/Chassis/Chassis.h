@@ -31,7 +31,6 @@ private:
 	static void countStepsL();
 	static void countStepsR();
 	static void checkMotorsSpeed();
-	static void equalizeMotorsSpeed(Motor* slower, Motor* faster);
 
 //variables
 	static int targetAzimuth;
