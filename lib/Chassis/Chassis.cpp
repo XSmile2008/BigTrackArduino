@@ -9,6 +9,7 @@ Motor* Chassis::motorLeft;
 Motor* Chassis::motorRight;
 
 Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRight) {
+	compass = new HMC5883L();
 	motorLeft = new Motor(pinDirLeft, pinPwmLeft);
 	motorRight = new Motor(pinDirRight, pinPwmRight);
 
@@ -16,13 +17,11 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 
 	attachInterrupt(0, Chassis::countStepsL, RISING);
 	attachInterrupt(1, Chassis::countStepsR, RISING);
-
-	compass = new HMC5883L();
 }
 
 float e = 3;
 void Chassis::task() {
-	// telemetry();
+	telemetry();
 	checkMotorsSpeed();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
@@ -86,7 +85,7 @@ void Chassis::checkMotorsSpeed() {
 		Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
 		Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(pwmOffset);
 	} else {
-		//TODO:
+		//TODO: stop worked motor and full power stoped motor
 	}
 }
 
