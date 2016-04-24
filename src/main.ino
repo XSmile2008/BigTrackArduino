@@ -63,6 +63,7 @@ void setup() {
   sonar = new Sonar(9, 10, 11, 12, 13);
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   // chassis->test();
+  // Tests::listTest();
   // Tests::commandTest();
   // Tests::circularBufferTest();
   // sonar->task();
@@ -71,4 +72,16 @@ void setup() {
 void loop() {
   // chassis->task();
   sonar->task();
+  if (sonar->getData()->size() > 0) {
+    for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
+      SonarData* data = sonar->getData()->popStart();
+      Command* command = new Command('s');
+      command->getArguments()->add(new Argument('a', 2, &data->angle));
+      command->getArguments()->add(new Argument('d', 2, &data->distance));
+      command->getArguments()->add(new Argument('t', 4, &data->captureTime));
+      command->serialize();
+      delete data;
+      delete command;
+    }
+  }
 }

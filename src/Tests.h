@@ -4,8 +4,7 @@
 #include "MemoryFree.h"
 #include "Parser.h"
 #include "ArrayList.h"
-#include "ArrayList.cpp"
-#include "CircularBuffer.cpp"
+#include "CircularBuffer.h"
 
 class Tests {
   public:

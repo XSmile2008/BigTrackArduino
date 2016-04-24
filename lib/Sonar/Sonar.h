@@ -5,11 +5,12 @@
 #include "NewPing.h"
 #include "MemoryFree.h"
 #include "CircularBuffer.h"
+// #include "CircularBuffer.cpp"
 
 struct SonarData {
-  int16_t angle;
-  int16_t distance;
-  int16_t captureTime;
+  uint16_t angle;
+  uint16_t distance;
+  uint32_t captureTime;
 };
 
 class Sonar {
@@ -18,9 +19,9 @@ class Sonar {
     void task();
     void step();
     void test();
+    CircularBuffer<SonarData*>* getData();
   private:
-    void setAngle(uint16_t angle);
-    SonarData scan(NewPing* sonar);
+    SonarData* scan(NewPing* sonar);
 
     static const uint16_t SERVO_MIN = 544;
     static const uint16_t SERVO_MAX = 2400;
@@ -35,8 +36,7 @@ class Sonar {
     static const uint8_t MAX_SCAN_DISTANCE = 250;
 
     Servo servo;
-    NewPing* sonar0;
-    NewPing* sonar1;
+    NewPing** sonar;
 };
 
 #endif
