@@ -93,14 +93,6 @@ String HMC5883L::getErrorText(int errorCode) {
 float HMC5883L::getAzimuth() {
 	MagnetometerRaw raw = readRawAxis();
 
-  // Serial.print("X = ");
-  // Serial.print(raw.XAxis);
-  // Serial.print("Y = ");
-  // Serial.print(raw.YAxis);
-  // Serial.print("Z = ");
-  // Serial.print(raw.ZAxis);
-  // Serial.print(" ||| ");
-
 	calibrate(&raw);
   float heading = atan2(raw.YAxis, raw.XAxis);
 
@@ -108,19 +100,11 @@ float HMC5883L::getAzimuth() {
     heading += 2*PI;
   else if(heading > 2*PI)
     heading -= 2*PI;
-  float azimuth = heading * 180/M_PI;
+  float azimuth = heading * 180/M_PI + 180;//TODO: hardcode, make calibration
 
-  // Serial.print("X = ");
-  // Serial.print(raw.XAxis);
-  // Serial.print("Y = ");
-  // Serial.print(raw.YAxis);
-  // Serial.print("Z = ");
-  // Serial.print(raw.ZAxis);
-  // Serial.print(" ||| ");
-  // Serial.print("azimuth = ");
-  // Serial.print(azimuth);
-  // Serial.println();
-  //delay(500);
+  if (azimuth > 360) azimuth -= 360;
+  else if (azimuth < 0) azimuth += 360;
+
   return azimuth;
 }
 

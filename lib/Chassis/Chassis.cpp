@@ -81,8 +81,8 @@ void Chassis::checkMotorsSpeed() {
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
 
-		Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
-		Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(pwmOffset);
+		// Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
+		// Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(pwmOffset);
 	} else {
 		//TODO: stop worked motor and full power stoped motor
 	}

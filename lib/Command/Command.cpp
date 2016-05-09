@@ -19,7 +19,7 @@ Command::Command(byte key, List<Argument*>* arguments) {
 }
 
 Command::~Command() {
-	Serial.println(F("Command.destructor()"));
+	// Serial.println(F("Command.destructor()"));
 	for (uint16_t i = 0; i < arguments->size(); i++) delete arguments->get(i);
 	delete arguments;
 }

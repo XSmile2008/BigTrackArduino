@@ -29,7 +29,6 @@ Command* Parser::parse(byte* data, uint8_t dataLength) {//TODO: refactoring, ret
   Serial.println("Buffer:");
   for (int i = 0; i < bufferLength; i++) {Serial.print(buffer[i]); Serial.print(F(", "));}Serial.println();//TODO: remove
 
-
   for (int start = searchStart(0); start != NOT_FIND; start = searchStart(start + 1)) {
     for (int end = searchEnd(start + Command::EMPTY_COMMAND_LENGTH - 1); end != NOT_FIND; end = searchEnd(end + 1)) {
       Serial.print("start = "); Serial.print(start); Serial.print(" | end = "); Serial.println(end);//TODO: remove

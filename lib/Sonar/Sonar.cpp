@@ -17,7 +17,7 @@ Sonar::Sonar(uint8_t servoPin, uint8_t trig0, uint8_t echo0, uint8_t trig1, uint
 
 void Sonar::task() {
   if (millis() >= lastStepTime + PAUSE_STEP) {
-    Serial.print("free mem: ");Serial.println(freeMemory());
+    // Serial.print("free mem: ");Serial.println(freeMemory());
     step();
   }
 }
@@ -25,9 +25,9 @@ void Sonar::task() {
 void Sonar::step() {
   lastStepTime = millis();
 
-  datas->put(scan(sonar[0]));
+  datas->put(scan(sonar[0], 0));
   delay(PAUSE_SCAN);
-  datas->put(scan(sonar[1]));
+  datas->put(scan(sonar[1], 180));
   delay(PAUSE_SCAN);
 
   currAngle = currAngle + ANGLE_STEP * diraction;
@@ -38,14 +38,15 @@ void Sonar::step() {
     diraction = -diraction;
     currAngle = ANGLE_MIN;
   }
-
-  Serial.print("angle = "); Serial.println(currAngle);
-  servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MIN, SERVO_MAX));
+  servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MAX, SERVO_MIN));//Reverse
 }
 
-SonarData* Sonar::scan(NewPing* sonar) {
+SonarData* Sonar::scan(NewPing* sonar, int16_t offset) {
+  int16_t angle = currAngle - offset - ANGLE_OFFSET;
+  if (angle > 360) angle -= 360;
+  else if (angle < 0) angle += 360;
   SonarData* data = new SonarData();
-  data->angle = currAngle;
+  data->angle = angle;
   data->captureTime = millis();
   data->distance = sonar->ping_cm();
   return data;

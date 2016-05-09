@@ -8,8 +8,8 @@
 // #include "CircularBuffer.cpp"
 
 struct SonarData {
-  uint16_t angle;
-  uint16_t distance;
+  int16_t angle;
+  int16_t distance;
   uint32_t captureTime;
 };
 
@@ -21,7 +21,7 @@ class Sonar {
     void test();
     CircularBuffer<SonarData*>* getData();
   private:
-    SonarData* scan(NewPing* sonar);
+    SonarData* scan(NewPing* sonar, int16_t offset);
 
     static const uint16_t SERVO_MIN = 544;
     static const uint16_t SERVO_MAX = 2400;
@@ -32,6 +32,7 @@ class Sonar {
     static const uint8_t ANGLE_STEP = 10;
     static const uint8_t PAUSE_SCAN = 15;
     static const uint8_t PAUSE_STEP = 250;
+    // static const uint16_t PAUSE_STEP = 1000;
 
     static const uint8_t MAX_SCAN_DISTANCE = 250;
 
