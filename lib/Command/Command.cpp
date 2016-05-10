@@ -1,6 +1,4 @@
 #include "Command.h"
-#include "ArrayList.cpp"
-#include "Argument.h"
 
 const byte Command::COMMAND_START[] = {':', ':'};
 const uint8_t Command::COMMAND_START_LENGTH = 2;
@@ -21,7 +19,7 @@ Command::Command(byte key, List<Argument*>* arguments) {
 }
 
 Command::~Command() {
-	// Serial.println(F("Command.destructor()"));
+	Serial.println(F("Command.destructor()"));
 	for (uint16_t i = 0; i < arguments->size(); i++) delete arguments->get(i);
 	delete arguments;
 }

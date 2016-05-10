@@ -4,6 +4,7 @@
 #include "HMC5883L.h"
 #include "Motor.h"
 #include "Command.h"
+#include "CircularBuffer.h"
 //#include "Commands.h"
 
 #define LEFT 'l'
@@ -19,13 +20,10 @@ public:
 
 	void test();
 	void stop();
-
 	void move(int diraction);
-	void moveSteps(int diraction, int steps);
-	void moveDistance(int diraction, int distance);
+	void rotate(int diraction);
 
 	void setAzimuth(int azimuth, bool lock);
-	void rotate(int diraction);
 	void rotateTo(int azimuth);
 
 private:
@@ -33,7 +31,6 @@ private:
 	static void countStepsL();
 	static void countStepsR();
 	static void checkMotorsSpeed();
-	static void equalizeMotorsSpeed(Motor* slower, Motor* faster);
 
 //variables
 	static int targetAzimuth;

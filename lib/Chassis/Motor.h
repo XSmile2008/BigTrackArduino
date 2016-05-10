@@ -4,34 +4,34 @@
 
 class Motor {
   public:
-    Motor(int pinDir, int pwmPin);
+    Motor(uint8_t pinDir, uint8_t pwmPin);
     void handleStep();
 
     void stop();
 
-    int getDir();
-    void setDir(int Dir);
+    int8_t getDir();
+    void setDir(int8_t dir);
 
-    int getPwm();
-    void setPwm(int pwm);
+    uint8_t getPwm();
+    void setPwm(uint8_t pwm);
 
-    int getSteps();
-    void setSteps(int steps);
+    uint16_t getSteps();
+    void setSteps(uint16_t steps);
 
-    int getStepTime();
-    void setStepTime(int stepTime);
+    uint16_t getStepTime();
+    void setStepTime(uint16_t stepTime);
   private:
     void changeSpeed();
 
     uint8_t pwm;
     int8_t dir;//Might be 1 (forward), 0 (stop) or -1 (backward)
 
-  	int pinDir;
-  	int pinPwm;
+  	uint8_t pinDir;
+  	uint8_t pinPwm;
 
-    int steps;
-    int stepTime;
-  	int stepLastMillis;
+    uint16_t steps;
+    uint16_t stepTime;
+  	uint32_t stepLastMillis;
 };
 
 #endif

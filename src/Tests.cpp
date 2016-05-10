@@ -4,13 +4,13 @@ void Tests::lifeTest() {
   int lifetime = 0;
   while (true) {
     Serial.println(lifetime++);
-    for (int i = 0; i < 100; i++) Serial.print("nyan");
+    for (int i = 0; i < 100; i++) Serial.print(F("nyan"));
     delay(1000);
   }
 }
 
 void Tests::listTest() {
-  Serial.print(F("free memory before create list: ")); Serial.println(freeMemory());
+  Serial.print(F("Free memory before test: ")); Serial.println(freeMemory());
   Serial.print(F("create list: "));
   ArrayList<int> *list = new ArrayList<int>();
   list->print();
@@ -55,6 +55,51 @@ void Tests::listTest() {
 
   delete list;
   Serial.print(F("after delete: ")); Serial.println(freeMemory());
+}
+
+void Tests::circularBufferTest() {
+  Serial.print(F("Free memory before test: ")); Serial.println(freeMemory());
+  CircularBuffer<int> *buffer =  new CircularBuffer<int>(5);
+  buffer->put(5);
+  buffer->put(3);
+  buffer->put(10);
+  buffer->put(4);
+  buffer->put(5);
+  buffer->put(1);
+  buffer->put(9);
+  buffer->put(0);
+
+  buffer->print();
+
+  Serial.println(F("after remove [1]"));
+  buffer->remove(1);
+  buffer->print();
+
+  Serial.println(F("after put 11"));
+  buffer->put(11);
+  buffer->print();
+
+  Serial.print(F("popStart = ")); Serial.println(buffer->popStart());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.print(F("popEnd = ")); Serial.println(buffer->popEnd());
+  buffer->print();
+
+  Serial.println(F("after remove [2]"));
+  buffer->remove(2);
+  buffer->print();
+
+  delete buffer;
+  Serial.println(F("Free memory before after test: ")); Serial.println(freeMemory());
 }
 
 void Tests::commandTest() {

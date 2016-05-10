@@ -1,6 +1,6 @@
 #include "Motor.h"
 
-Motor::Motor(int pinDir, int pinPwm) {
+Motor::Motor(uint8_t pinDir, uint8_t pinPwm) {
   pinMode(pinDir, OUTPUT);
 	pinMode(pinPwm, OUTPUT);
 
@@ -29,8 +29,8 @@ void Motor::changeSpeed() {
 void Motor::handleStep() {
   steps++;
 	if (stepLastMillis > 0) {
-		int stepCurrMillis = millis();
-		stepTime = (stepTime + stepCurrMillis - stepLastMillis)/2;
+		uint32_t stepCurrMillis = millis();
+		stepTime = stepCurrMillis - stepLastMillis;
 		stepLastMillis = stepCurrMillis;
 	} else stepLastMillis = millis();
 }
@@ -42,37 +42,37 @@ void Motor::stop() {
   digitalWrite(pinPwm, LOW);
 }
 
-int Motor::getDir() {
+int8_t Motor::getDir() {
   return dir;
 }
 
-void Motor::setDir(int dir) {
+void Motor::setDir(int8_t dir) {
   this->dir = dir;
   changeSpeed();
 }
 
-int Motor::getPwm() {
+uint8_t Motor::getPwm() {
   return pwm;
 }
 
-void Motor::setPwm(int pwm) {
-	Serial.print("PWM"); Serial.print((int)this); Serial.print(" = "); Serial.println(pwm);
+void Motor::setPwm(uint8_t pwm) {
+	// Serial.print("PWM"); Serial.print((int)this); Serial.print(" = "); Serial.println(pwm);
 	this->pwm = pwm;
   changeSpeed();
 }
 
-int Motor::getSteps() {
+uint16_t Motor::getSteps() {
   return steps;
 }
 
-void Motor::setSteps(int steps) {
+void Motor::setSteps(uint16_t steps) {
   this->steps = steps;
 }
 
-int Motor::getStepTime() {
+uint16_t Motor::getStepTime() {
   return stepTime;
 }
 
-void Motor::setStepTime(int stepTime) {
+void Motor::setStepTime(uint16_t stepTime) {
   this->stepTime = stepTime;
 }

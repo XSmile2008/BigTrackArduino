@@ -4,12 +4,13 @@
 #include "MemoryFree.h"
 #include "Parser.h"
 #include "ArrayList.h"
-#include "ArrayList.cpp"
+#include "CircularBuffer.h"
 
 class Tests {
   public:
     static void lifeTest();
     static void listTest();
+    static void circularBufferTest();
     static void commandTest();
     static void printBytes(byte bytes[], int size);
 };
