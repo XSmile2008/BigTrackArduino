@@ -5,6 +5,7 @@
 #include "Motor.h"
 #include "Command.h"
 #include "CircularBuffer.h"
+#include "Squircle.h"
 //#include "Commands.h"
 
 #define LEFT 'l'
@@ -31,6 +32,7 @@ private:
 	static void countStepsL();
 	static void countStepsR();
 	static void checkMotorsSpeed();
+	static void xy2lr(int x, int y, int &l, int &r);
 
 //variables
 	static int targetAzimuth;

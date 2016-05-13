@@ -7,6 +7,12 @@ HMC5883L* Chassis::compass;
 Motor* Chassis::motorLeft;
 Motor* Chassis::motorRight;
 
+int16_t maxDelta = 255;
+int16_t maxOffset = 50;
+int16_t offsetY = -20;
+int16_t axisX = 0;
+int16_t axisY = 0;
+
 Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRight) {
 	compass = new HMC5883L();
 	motorLeft = new Motor(pinDirLeft, pinPwmLeft);
@@ -63,29 +69,33 @@ void Chassis::countStepsR() {
 	// Serial.print("stepsRight = "); Serial.println(motorRight->getSteps());
 }
 
-uint8_t maxOffset = 50;
-int8_t pwmOffset = -20;
 void Chassis::checkMotorsSpeed() {
 	if (motorLeft->getDir() == 0 || motorRight->getDir() == 0) return;
 	if (motorLeft->getSteps() > 0 && motorRight->getSteps() > 0) {
 		int16_t delta =  motorLeft->getStepTime() - motorRight->getStepTime();
 		uint16_t slowerStepTime = delta > 0 ? motorLeft->getStepTime() : motorRight->getStepTime();
-		int8_t percents = (float) delta / (float) slowerStepTime * 100;
+		int8_t percents = (float) delta / (float) slowerStepTime * 100;//faster motor faster by *percents* then slower motor
 
-		pwmOffset -= percents;
-		if (pwmOffset > maxOffset) pwmOffset = maxOffset;
-		else if (pwmOffset < -maxOffset) pwmOffset = -maxOffset;
+		offsetY -= percents;
+		offsetY = constrain(offsetY, -maxOffset, maxOffset);
 
-		motorLeft->setPwm(pwmOffset > 0 ? 255 - pwmOffset : 255);
-		motorRight->setPwm(pwmOffset < 0 ? 255 + pwmOffset : 255);
+		motorLeft->setPwm(offsetY > 0 ? 255 - offsetY : 255);
+		motorRight->setPwm(offsetY < 0 ? 255 + offsetY : 255);
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
 
 		// Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
-		// Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(pwmOffset);
+		// Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(offsetY);
 	} else {
 		//TODO: stop worked motor and full power stoped motor
 	}
+}
+
+void Chassis::xy2lr(int x, int y, int &l, int &r) {
+	double v = (100 - abs(x)) * (y / 100.0) + y;
+	double w = (100 - abs(y)) * (x / 100.0) + x;
+	l = (v - w) / 2;
+	r = (v + w) / 2;
 }
 
 void Chassis::test() {
