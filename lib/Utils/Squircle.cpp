@@ -1,21 +1,22 @@
 #include "Squircle.h"
 
+//(u,v) are circular coordinates in the domain {(u,v) | u² + v² ≤ 1}
+//(x,y) are square coordinates in the range [-1,1] x [-1,1]
+
 // Elliptical Grid mapping
 // mapping a circular disc to a square region
 // input: (u,v) coordinates in the circle
 // output: (x,y) coordinates in the square
-void Squircle::cirleToSquare(double u, double v, double& x, double& y) {
+void Squircle::circleToSquare(double u, double v, double& x, double& y) {
     double u2 = u * u;
     double v2 = v * v;
     double twosqrt2 = 2.0 * sqrt(2.0);
+    double twosqrt2u = u * twosqrt2;
+    double twosqrt2v = v * twosqrt2;
     double subtermx = 2.0 + u2 - v2;
     double subtermy = 2.0 - u2 + v2;
-    double termx1 = subtermx + u * twosqrt2;
-    double termx2 = subtermx - u * twosqrt2;
-    double termy1 = subtermy + v * twosqrt2;
-    double termy2 = subtermy - v * twosqrt2;
-    x = 0.5 * sqrt(termx1) - 0.5 * sqrt(termx2);
-    y = 0.5 * sqrt(termy1) - 0.5 * sqrt(termy2);
+    x = 0.5 * sqrt(subtermx + twosqrt2u) - 0.5 * sqrt(subtermx - twosqrt2u);
+    y = 0.5 * sqrt(subtermy + twosqrt2v) - 0.5 * sqrt(subtermy - twosqrt2v);
 }
 
 // Elliptical Grid mapping

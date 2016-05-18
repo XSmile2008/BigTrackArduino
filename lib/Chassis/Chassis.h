@@ -21,8 +21,7 @@ public:
 
 	void test();
 	void stop();
-	void move(int diraction);
-	void rotate(int diraction);
+	void move(int16_t x, int16_t y);
 
 	void setAzimuth(int azimuth, bool lock);
 	void rotateTo(int azimuth);
@@ -32,7 +31,9 @@ private:
 	static void countStepsL();
 	static void countStepsR();
 	static void checkMotorsSpeed();
-	static void xy2lr(int x, int y, int &l, int &r);
+	static void fill(int16_t& l, int16_t& r, int16_t minL, int16_t maxL, int16_t minR, int16_t maxR);
+	static int8_t percents(int16_t l, int16_t r);
+	static void xy2lr(int16_t x, int16_t y, int16_t& l, int16_t& r);
 
 //variables
 	static int targetAzimuth;

@@ -8,10 +8,9 @@ Motor* Chassis::motorLeft;
 Motor* Chassis::motorRight;
 
 int16_t maxDelta = 255;
-int16_t maxOffset = 50;
-int16_t offsetY = -20;
-int16_t axisX = 0;
-int16_t axisY = 0;
+int16_t maxOffset = 50, offsetY = -20;
+int16_t axisX, axisY;
+int16_t l, r;
 
 Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRight) {
 	compass = new HMC5883L();
@@ -26,7 +25,7 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 
 float e = 3;
 void Chassis::task() {
-	telemetry();
+	// telemetry();
 	checkMotorsSpeed();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
@@ -71,31 +70,56 @@ void Chassis::countStepsR() {
 
 void Chassis::checkMotorsSpeed() {
 	if (motorLeft->getDir() == 0 || motorRight->getDir() == 0) return;
-	if (motorLeft->getSteps() > 0 && motorRight->getSteps() > 0) {
-		int16_t delta =  motorLeft->getStepTime() - motorRight->getStepTime();
-		uint16_t slowerStepTime = delta > 0 ? motorLeft->getStepTime() : motorRight->getStepTime();
-		int8_t percents = (float) delta / (float) slowerStepTime * 100;//faster motor faster by *percents* then slower motor
-
-		offsetY -= percents;
+	if (motorLeft->getSteps() > 0 && motorRight->getSteps() > 0 && false) {
+		offsetY -= percents(motorLeft->getStepTime(), motorRight->getStepTime());
 		offsetY = constrain(offsetY, -maxOffset, maxOffset);
 
-		motorLeft->setPwm(offsetY > 0 ? 255 - offsetY : 255);
-		motorRight->setPwm(offsetY < 0 ? 255 + offsetY : 255);
+		int16_t pwmL = l - offsetY/2;
+		int16_t pwmR = r + offsetY/2;
+
+		fill(pwmL, pwmR, 0, 255, 0, 255);
+
+		motorLeft->setPwm(pwmL);
+		motorRight->setPwm(pwmR);
 		motorLeft->setSteps(0);
 		motorRight->setSteps(0);
 
-		// Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
-		// Serial.print(F("delta = ")); Serial.print(delta); Serial.print(F("percents = ")); Serial.print(percents); Serial.print(F(" offset = ")); Serial.println(offsetY);
+		Serial.print(F("left = ")); Serial.print(motorLeft->getStepTime()); Serial.print(F(" right = ")); Serial.println(motorRight->getStepTime());
+		Serial.print(F("offsetY = ")); Serial.println(offsetY);
 	} else {
 		//TODO: stop worked motor and full power stoped motor
 	}
 }
 
-void Chassis::xy2lr(int x, int y, int &l, int &r) {
-	double v = (100 - abs(x)) * (y / 100.0) + y;
-	double w = (100 - abs(y)) * (x / 100.0) + x;
-	l = (v - w) / 2;
-	r = (v + w) / 2;
+void Chassis::fill(int16_t& l, int16_t& r, int16_t minL, int16_t maxL, int16_t minR, int16_t maxR) {
+	int16_t aboveL = l - maxL;
+	if (aboveL < 0) aboveL = 0;
+	int16_t belowL = l - minL;
+	if (belowL > 0) belowL = 0;
+
+	int16_t aboveR = r - maxR;
+	if (aboveR < 0) aboveR = 0;
+	int16_t belowR = r - minR;
+	if (belowR > 0) belowR = 0;
+
+	l = constrain(l + belowR - aboveR, minL, maxL);
+	r = constrain(r + belowL - aboveL, minR, maxR);
+}
+
+/*
+* return positive percent value if l > r
+* return negative percent value if l < r
+*/
+int8_t Chassis::percents(int16_t l, int16_t r) {
+	return (float) (l - r) / (float) (l > r ? l : r) * 100.0;
+}
+
+void Chassis::xy2lr(int16_t x, int16_t y, int16_t &l, int16_t &r) {
+	float scale = 255.0;
+	float v = (scale - abs(x)) * (y / scale) + y;
+	float w = (scale - abs(y)) * (x / scale) + x;
+	l = (int16_t) (v - w) / 2.0;
+	r = (int16_t) (v + w) / 2.0;
 }
 
 void Chassis::test() {
@@ -129,21 +153,14 @@ void Chassis::stop() {
 	motorRight->stop();
 }
 
-void Chassis::move(int diraction) {
-	stop();
-	motorLeft->setPwm(255);
-	motorRight->setPwm(255);
-	motorLeft->setDir(diraction == FORWARD ? 1 : -1);
-	motorRight->setDir(diraction == FORWARD ? 1 : -1);
+void Chassis::move(int16_t x, int16_t y) {
+	xy2lr(-x, y, l, r);//TODO: x axis is inversed
+	motorLeft->setPwm(abs(l));
+	motorRight->setPwm(abs(r));
+	motorLeft->setDir(l == 0 ? 0 : (l > 0 ? 1 : -1));
+	motorRight->setDir(r == 0 ? 0 : (r > 0 ? 1 : -1));
+	Serial.println("MOVE: x = " + String(x) + ", y = " + String(y) + ", l = " + String(l) + ", r = " + String(r));
 }
-
-void Chassis::rotate(int diraction) {
-	motorLeft->setPwm(255);
-	motorRight->setPwm(255);
-	motorLeft->setDir(diraction == LEFT ? -1 : 1);
-	motorRight->setDir(diraction == LEFT ? 1 : -1);
-}
-
 /*
  * Motor control section end
  *^^^^^^^^^^^^^^^^^^^^^^^^^^*/
@@ -159,8 +176,8 @@ void Chassis::rotateTo(int targetAzimuth) {
 	int deviation = targetAzimuth - currAzimuth;
 	deviation += ((deviation <= -180) ? 360 : (deviation >= 180 ? -360 : 0));
 	if (deviation >= 0) {
-		rotate(RIGHT);
+		move(255, 0);//right
 	} else {
-		rotate(LEFT);
+		move(-255, 0);//left
 	}
 }

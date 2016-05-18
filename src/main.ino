@@ -38,14 +38,15 @@ void runCommand(Command* command) {
         chassis->setAzimuth(-1, false);//TODO:
         chassis->stop();
       } else {
-        Argument* diraction = command->getArgument(DIRACTION);
-        if (diraction != NULL) chassis->move(*(byte*) diraction->getValue());
+        Argument* x = command->getArgument('x');
+        Argument* y = command->getArgument('y');
+        chassis->move(*(int16_t*) x->getValue(), *(int16_t*) y->getValue());
       }
       break;
     }
     case ROTATE : {
       if (command->getArgument(AZIMUTH) != NULL) chassis->setAzimuth(*(int16_t*) command->getArgument(AZIMUTH)->getValue(), false);
-      else if (command->getArgument(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArgument(DIRACTION)->getValue());
+      // else if (command->getArgument(DIRACTION) != NULL) chassis->rotate(*(byte*) command->getArgument(DIRACTION)->getValue());
       break;
     }
     case LIFETEST : {
@@ -71,7 +72,7 @@ void setup() {
 
 void loop() {
   chassis->task();
-  sonar->task();
+  // sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
       SonarData* data = sonar->getData()->popStart();
