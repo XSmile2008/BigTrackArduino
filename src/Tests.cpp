@@ -106,7 +106,7 @@ void Tests::commandTest() {
   Serial.println();
   Serial.print(F("start of test: ")); Serial.println(freeMemory());
 
-  Parser* parser = new Parser();
+  Parser parser = Parser();
 
   const uint8_t dataLength = 21;
   byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10, 100, 100, 100, 100, 58,97,0,13,10};
@@ -115,16 +115,14 @@ void Tests::commandTest() {
   // byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
 
   //byte* data = new byte[dataLength] {58, 100, 0, 13,10};
-  Command* command = parser->parse(data, dataLength);
-  if (command != NULL) {
-    command->serialize();
-  } else {
-    Serial.println(F("Command not valid"));
+  List<Command*>* commands = parser.parse(data, dataLength);
+  for (uint8_t i = 0; i < commands->size(); i++) {
+      commands->get(i)->serialize();
+      delete commands->get(i);
   }
 
   delete[] data;
-  delete command;
-  delete parser;
+  delete commands;
   Serial.print(F("end of test: ")); Serial.println(freeMemory());
 }
 

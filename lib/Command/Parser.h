@@ -7,13 +7,16 @@ class Parser {
   public:
     Parser();
     ~Parser();
-    Command* parse(byte* data, uint8_t size);
+    List<Command*>* parse(byte* data, uint8_t size);
   private:
-    uint16_t searchStart(uint16_t from);
-    uint16_t searchEnd(uint16_t from);
+    void trim(uint16_t from);
+    uint16_t searchStart(byte* buffer, uint16_t lenght, uint16_t from);
+    uint16_t searchEnd(byte* buffer, uint16_t lenght, uint16_t from);
+    Command* searchCommand();
 
     byte* buffer;
     uint8_t bufferLength;
+    static const int16_t MAX_BUFFER_LEGHT = 128;
     static const int8_t NOT_FIND = - 1;
 };
 

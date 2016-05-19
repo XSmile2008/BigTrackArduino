@@ -22,11 +22,13 @@ void serialEvent() {
     int dataLength = Serial.available();
     Serial.readBytes(data, dataLength);
 
-    Command* command = parser.parse(data, dataLength);
-    if (command != NULL) runCommand(command);
-    else Serial.println(F("Command is not valid!"));
+    List<Command*>* commands = parser.parse(data, dataLength);
+    for (uint8_t i = 0; i < commands->size(); i++) {
+        runCommand(commands->get(i));
+        delete commands->get(i);
+    }
+    delete commands;
 
-    delete command;
     Serial.print(F("FreeMem.onDestroy: ")); Serial.println(freeMemory());
   }
 }
