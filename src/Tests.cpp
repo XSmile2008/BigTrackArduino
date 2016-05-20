@@ -106,16 +106,18 @@ void Tests::commandTest() {
   Serial.println();
   Serial.print(F("start of test: ")); Serial.println(freeMemory());
 
-  Parser parser = Parser();
+  Parser* parser = new Parser();
+  Serial.print(F("new Parser(): ")); Serial.println(freeMemory());
 
-  const uint8_t dataLength = 21;
-  byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10, 100, 100, 100, 100, 58,97,0,13,10};
+  const uint8_t dataLength = 24;
+  byte* data = new byte[dataLength] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10,    100,100,100,100,    58,58,97,0,13,10};
 
   // const uint8_t dataLength = 12;
   // byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
 
   //byte* data = new byte[dataLength] {58, 100, 0, 13,10};
-  List<Command*>* commands = parser.parse(data, dataLength);
+  Serial.print(F("after init test data: ")); Serial.println(freeMemory());
+  List<Command*>* commands = parser->parse(data, dataLength);
   for (uint8_t i = 0; i < commands->size(); i++) {
       commands->get(i)->serialize();
       delete commands->get(i);
@@ -123,6 +125,7 @@ void Tests::commandTest() {
 
   delete[] data;
   delete commands;
+  delete parser;
   Serial.print(F("end of test: ")); Serial.println(freeMemory());
 }
 

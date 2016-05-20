@@ -1,32 +1,39 @@
 #include "Parser.h"
+#include "MemoryFree.h"
 
 Parser::Parser() {
   bufferLength = 0;
-  buffer = new byte[bufferLength];
+  buffer = (byte*) malloc(bufferLength);
 }
 
 Parser::~Parser() {
-  delete[] buffer;
+  free(buffer);
 }
 
 List<Command*>* Parser::parse(byte* data, uint8_t dataLength) {
-  if (bufferLength > MAX_BUFFER_LEGHT) trim(bufferLength / 2);
+  Serial.print(F("New data @")); Serial.print((int) data); Serial.print(F(", len = ")); Serial.println(dataLength);
+  Serial.print(F("buffer @")); Serial.print((int) buffer); Serial.print(F(", len = ")); Serial.println(bufferLength);
+  Serial.print(F("freemem = ")); Serial.println(freeMemory());
+  if (bufferLength > MAX_BUFFER_LENGTH) trim(bufferLength / 2);
   if (bufferLength == 0) {
-    int start = searchStart(data, dataLength, 0);
+    int16_t start = searchStart(data, dataLength, 0);
+    Serial.print(F("nyan, start = ")); Serial.println(start);
     if (start != NOT_FIND) {
-      bufferLength = dataLength - start + 1;
+      bufferLength = dataLength - start;
       buffer = (byte*) realloc(buffer, bufferLength);
       memcpy(buffer, data + start, bufferLength);
     }
   } else {
+    Serial.println(F("punyan"));
     buffer = (byte*) realloc(buffer, bufferLength + dataLength);
     memcpy(buffer + bufferLength, data, dataLength);
     bufferLength += dataLength;
   }
 
+  Serial.print(F("freemem before parsing = ")); Serial.println(freeMemory());
   List<Command*>* commands = new ArrayList<Command*>();
   while (true) {
-    Serial.println("Buffer length = " + String(bufferLength));//TODO: remove
+    Serial.print(F("Buffer length = ")); Serial.println(bufferLength);//TODO: remove
     Command* command = searchCommand();
     if (command != NULL) commands->add(command);
     else break;
@@ -35,13 +42,14 @@ List<Command*>* Parser::parse(byte* data, uint8_t dataLength) {
 }
 
 /**
-     * used for trim buffer
-     * to cut off unused data from start of @buffer,
-     * and delete already parsed commands
-     *
-     * @param from search from this position to find new command start, if not find delete all buffer
-     */
+ * used for trim buffer
+ * to cut off unused data from start of @buffer,
+ * and delete already parsed commands
+ *
+ * @param from search from this position to find new command start, if not find delete all buffer
+ */
 void Parser::trim(uint16_t from) {
+  Serial.print("trim("); Serial.print(from); Serial.println(')');
   int16_t start = searchStart(buffer, bufferLength, from);
   if (start == NOT_FIND) {//TODO:
     free(buffer);
@@ -53,11 +61,11 @@ void Parser::trim(uint16_t from) {
   }
 }
 
-uint16_t Parser::searchStart(byte* buffer, uint16_t lenght, uint16_t from) {
-  for (uint16_t i = from; i < lenght; i++) {
+uint16_t Parser::searchStart(byte* buffer, uint16_t length, uint16_t from) {
+  for (uint16_t i = from; i < length; i++) {
     if (buffer[i] == Command::COMMAND_START[0]) {
       uint8_t errors = 0;
-      int16_t overflow = (i + Command::COMMAND_START_LENGTH) - lenght;
+      int16_t overflow = (i + Command::COMMAND_START_LENGTH) - length;
       for (uint8_t j = 1; j < Command::COMMAND_START_LENGTH - (overflow > 0 ? overflow : 0); j++) {
         if (buffer[i + j] != Command::COMMAND_START[j]) errors++;
       }
@@ -67,9 +75,9 @@ uint16_t Parser::searchStart(byte* buffer, uint16_t lenght, uint16_t from) {
   return NOT_FIND;
 }
 
-uint16_t Parser::searchEnd(byte* buffer, uint16_t lenght, uint16_t from) {
+uint16_t Parser::searchEnd(byte* buffer, uint16_t length, uint16_t from) {
   // from = from - Command::COMMAND_END_LENGTH >= 0 ? from : Command::COMMAND_END_LENGTH;
-  for (uint16_t i = from; i < lenght; i++) {
+  for (uint16_t i = from; i < length; i++) {
     if (buffer[i] == Command::COMMAND_END[Command::COMMAND_END_LENGTH - 1]) {
       uint8_t errors = 0;
       for (uint8_t j = 0; j < Command::COMMAND_END_LENGTH; j++) {

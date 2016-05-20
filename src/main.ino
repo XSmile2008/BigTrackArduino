@@ -67,13 +67,13 @@ void setup() {
   Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
   // chassis->test();
   // Tests::listTest();
-  // Tests::commandTest();
+  Tests::commandTest();
   // Tests::circularBufferTest();
   // sonar->task();
 }
 
 void loop() {
-  chassis->task();
+  // chassis->task();
   // sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
