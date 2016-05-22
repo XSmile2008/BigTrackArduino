@@ -44,7 +44,7 @@ Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
 	uint16_t pos = START_LENGTH;
 	uint8_t key = bytes[pos++];
 	uint8_t argsCount = bytes[pos++];
-	printf_P(PSTR("Command::deserialize: lenght = %d, key = %d, argsCount = %d\n"), bytesLength, key, argsCount);//TODO: debug
+	// printf_P(PSTR("Command::deserialize: lenght = %d, key = %d, argsCount = %d\n"), bytesLength, key, argsCount);//TODO: debug
 
 	List<Argument*>* arguments = new ArrayList<Argument*>(argsCount);
 	for (uint8_t i = 0; i < argsCount; i++) {
@@ -54,7 +54,7 @@ Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
 		arguments->add(new Argument(&bytes[pos], argSize + Argument::OFFSET));
 		pos += arguments->get(i)->getLength();
 
-		arguments->get(i)->print();//TODO: debug
+		// arguments->get(i)->print();//TODO: debug
 	}
 	if ((arguments->size() == argsCount) && (pos + END_LENGTH == bytesLength)) {
 		return new Command(key, arguments);
@@ -78,7 +78,7 @@ List<Argument*>* Command::getArguments() {
 }
 
 void Command::setArguments(List<Argument*> arguments) {
-	delete Command::arguments;//TODO: check it
+	delete Command::arguments;//TODO: check it, what if old arguments list was not empty?
 	*Command::arguments = arguments;
 }
 

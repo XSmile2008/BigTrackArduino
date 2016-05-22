@@ -27,9 +27,9 @@ Parser parser = Parser();
 byte* data = new byte[64];//TODO: test it!!!
 void serialEvent() {
   while (Serial.available()) {
-    printf_P(PSTR("FreeMem.onCreate: %d\n"), freeMemory());
+    printf_P(PSTR("serialEvent(%d) - %d\n"), Serial.available(), freeMemory());//TODO: debug
+    // Serial.println(Serial.available());
 
-    Serial.println(Serial.available());
     int dataLength = Serial.available();
     Serial.readBytes(data, dataLength);
 
@@ -40,7 +40,7 @@ void serialEvent() {
     }
     delete commands;
 
-    printf_P(PSTR("FreeMem.onDestroy: %d\n"), freeMemory());
+    printf_P(PSTR("~serialEvent() - %d\n"), freeMemory());
   }
 }
 
@@ -79,14 +79,14 @@ void setup() {
   // chassis->test();
   // Tests::listTest();
   // Tests::commandTest();
-  Tests::parserTest();
+  // Tests::parserTest();
   // Tests::circularBufferTest();
   // sonar->task();
 }
 
 void loop() {
-  // chassis->task();
-  // sonar->task();
+  chassis->task();
+  sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
       SonarData* data = sonar->getData()->popStart();
@@ -94,7 +94,11 @@ void loop() {
       command->getArguments()->add(new Argument(AZIMUTH, 2, &data->angle));
       command->getArguments()->add(new Argument(DISTANCE, 2, &data->distance));
       command->getArguments()->add(new Argument(TIME, 4, &data->captureTime));
-      // command->serialize();
+      byte* buffer;
+      uint16_t length;
+      command->serialize(buffer, length);
+      Serial.write(buffer, length);
+      delete[] buffer;
       printf_P(PSTR("%d, angle = %d, distance = %d\n"), data->captureTime, data->angle, data->distance);
       // Serial.println(String(data->captureTime) + ", angle = " + String(data->angle) + ", distance = " + String(data->distance));
       delete data;

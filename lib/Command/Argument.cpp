@@ -1,12 +1,12 @@
 #include "Argument.h"
 
 Argument::Argument(byte* bytes, int8_t length) {
-  Serial.println(F("Argument.constructor()"));
+  // Serial.println(F("Argument.constructor()"));//TODO: debug
   this->bytes = (byte*) memcpy(malloc(length), bytes, length);
 }
 
 Argument::Argument(byte key, byte size, void* value) {
-  Serial.println(F("Argument.constructor()"));
+  // Serial.println(F("Argument.constructor()"));//TODO: debug
   bytes = (byte*) malloc(OFFSET + size);
   bytes[0] = key;
   bytes[1] = size;
@@ -14,7 +14,7 @@ Argument::Argument(byte key, byte size, void* value) {
 }
 
 Argument::~Argument() {
-  Serial.println(F("Argument.destructor()"));
+  // Serial.println(F("Argument.destructor()"));//TODO: debug
   free(bytes);
 }
 

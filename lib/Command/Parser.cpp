@@ -1,5 +1,5 @@
 #include "Parser.h"
-#include "MemoryFree.h"
+#include "MemoryFree.h"//TODO: remove
 
 Parser::Parser() {
   bufferLength = 0;
@@ -11,29 +11,25 @@ Parser::~Parser() {
 }
 
 List<Command*>* Parser::parse(byte* data, uint8_t dataLength) {
-  Serial.print(F("Parser::parse: data @")); Serial.print((int) data); Serial.print(F(", len = ")); Serial.print(dataLength);
-  Serial.print(F(" | buffer @")); Serial.print((int) buffer); Serial.print(F(", len = ")); Serial.println(bufferLength);
-  Serial.print(F("freemem = ")); Serial.println(freeMemory());
+  // printf_P(PSTR("Parser::parse: data @%d, len = %d | buffer @%d, len = %d\n"), data, dataLength, buffer, bufferLength);
+  // printf_P(PSTR("freemem = %d\n"), freeMemory());
   if (bufferLength > MAX_BUFFER_LENGTH) trim(bufferLength / 2);
   if (bufferLength == 0) {
     int16_t start = searchStart(data, dataLength, 0);
-    Serial.print(F("nyan, start = ")); Serial.println(start);
     if (start != NOT_FIND) {
       bufferLength = dataLength - start;
       buffer = (byte*) realloc(buffer, bufferLength);
       memcpy(buffer, data + start, bufferLength);
     }
   } else {
-    Serial.println(F("punyan"));
     buffer = (byte*) realloc(buffer, bufferLength + dataLength);
     memcpy(buffer + bufferLength, data, dataLength);
     bufferLength += dataLength;
   }
 
-  Serial.print(F("freemem before parsing = ")); Serial.println(freeMemory());
   List<Command*>* commands = new ArrayList<Command*>();
   while (true) {
-    Serial.print(F("Buffer length = ")); Serial.println(bufferLength);//TODO: remove
+    // printf_P(PSTR(">>>Buffer length = %d\n"), bufferLength);//TODO: remove
     Command* command = searchCommand();
     if (command != NULL) commands->add(command);
     else break;
@@ -49,14 +45,14 @@ List<Command*>* Parser::parse(byte* data, uint8_t dataLength) {
  * @param from search from this position to find new command start, if not find delete all buffer
  */
 void Parser::trim(uint16_t from) {
-  Serial.print("trim("); Serial.print(from); Serial.println(')');
+  // printf_P(PSTR("Parser::trim(%d) freeMem = %d\n"), from, freeMemory());
   int16_t start = searchStart(buffer, bufferLength, from);
   if (start == NOT_FIND) {//TODO:
-    free(buffer);
     bufferLength = 0;
+    buffer = (byte*) realloc(buffer, 0);
   } else if (start != 0) {
-    bufferLength = bufferLength - start;//TODO: test this!
-    memcpy(buffer, buffer + start, bufferLength);
+    bufferLength -= start;//TODO: test this!
+    memmove(buffer, buffer + start, bufferLength);
     buffer = (byte*) realloc(buffer, bufferLength);
   }
 }

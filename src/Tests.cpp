@@ -108,8 +108,8 @@ void Tests::parserTest() {
   Parser* parser = new Parser();
   printf_P(PSTR("new Parser(): %d\n"), freeMemory());
 
-  const uint8_t dataLength = 20;
-  byte* data = new byte[dataLength] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10,    /*100,100,100,100,*/    58,58,97,0,13,10};
+  const uint8_t dataLength = 24;
+  byte* data = new byte[dataLength] {0,0,0,0, 58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10,    /*100,100,100,100,*/    58,58,97,0,13,10};
   //byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
   //byte* data = new byte[dataLength] {58, 100, 0, 13,10};
 
@@ -176,7 +176,7 @@ void Tests::commandTest() {
 }
 
 void Tests::printBytes(byte bytes[], int size) {
-  printf_P(PSTR("bytes[%d]: --------------------"), size);
+  printf_P(PSTR("bytes[%d]: --------------------\n"), size);
 	for (int i = 0; i < size; i++) Serial.print((char) bytes[i]);
 	Serial.println();
 	for (int i = 0; i < size; i++) {Serial.print(bytes[i]); Serial.print(F(", "));}
