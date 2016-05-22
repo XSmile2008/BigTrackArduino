@@ -10,21 +10,23 @@ class Command {
 		Command(byte key);
 		Command(byte key, List<Argument*>* arguments);
 		~Command();
-		void serialize();
+
+		void serialize(byte*& bytes, uint16_t& length);
 		static Command* deserialize(byte bytes[], uint16_t size);
+
 		byte getKey();
 		void setKey(byte key);
 		List<Argument*>* getArguments();
 		void setArguments(List<Argument*> arguments);
 		Argument* getArgument(byte key);
 
-		static const byte COMMAND_START[];
-		static const uint8_t COMMAND_START_LENGTH;
+		static const byte START[];
+		static const uint8_t START_LENGTH;
 
-		static const byte COMMAND_END[];
-		static const uint8_t COMMAND_END_LENGTH;
+		static const byte END[];
+		static const uint8_t END_LENGTH;
 
-		static const int EMPTY_COMMAND_LENGTH;
+		static const int EMPTY_LENGTH;
 	private:
 		byte key;
 		List<Argument*>* arguments;

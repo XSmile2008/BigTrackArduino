@@ -11,8 +11,8 @@ Parser::~Parser() {
 }
 
 List<Command*>* Parser::parse(byte* data, uint8_t dataLength) {
-  Serial.print(F("New data @")); Serial.print((int) data); Serial.print(F(", len = ")); Serial.println(dataLength);
-  Serial.print(F("buffer @")); Serial.print((int) buffer); Serial.print(F(", len = ")); Serial.println(bufferLength);
+  Serial.print(F("Parser::parse: data @")); Serial.print((int) data); Serial.print(F(", len = ")); Serial.print(dataLength);
+  Serial.print(F(" | buffer @")); Serial.print((int) buffer); Serial.print(F(", len = ")); Serial.println(bufferLength);
   Serial.print(F("freemem = ")); Serial.println(freeMemory());
   if (bufferLength > MAX_BUFFER_LENGTH) trim(bufferLength / 2);
   if (bufferLength == 0) {
@@ -63,11 +63,11 @@ void Parser::trim(uint16_t from) {
 
 uint16_t Parser::searchStart(byte* buffer, uint16_t length, uint16_t from) {
   for (uint16_t i = from; i < length; i++) {
-    if (buffer[i] == Command::COMMAND_START[0]) {
+    if (buffer[i] == Command::START[0]) {
       uint8_t errors = 0;
-      int16_t overflow = (i + Command::COMMAND_START_LENGTH) - length;
-      for (uint8_t j = 1; j < Command::COMMAND_START_LENGTH - (overflow > 0 ? overflow : 0); j++) {
-        if (buffer[i + j] != Command::COMMAND_START[j]) errors++;
+      int16_t overflow = (i + Command::START_LENGTH) - length;
+      for (uint8_t j = 1; j < Command::START_LENGTH - (overflow > 0 ? overflow : 0); j++) {
+        if (buffer[i + j] != Command::START[j]) errors++;
       }
       if (errors == 0) return i;
     }
@@ -76,12 +76,12 @@ uint16_t Parser::searchStart(byte* buffer, uint16_t length, uint16_t from) {
 }
 
 uint16_t Parser::searchEnd(byte* buffer, uint16_t length, uint16_t from) {
-  // from = from - Command::COMMAND_END_LENGTH >= 0 ? from : Command::COMMAND_END_LENGTH;
+  // from = from - Command::END_LENGTH >= 0 ? from : Command::END_LENGTH;
   for (uint16_t i = from; i < length; i++) {
-    if (buffer[i] == Command::COMMAND_END[Command::COMMAND_END_LENGTH - 1]) {
+    if (buffer[i] == Command::END[Command::END_LENGTH - 1]) {
       uint8_t errors = 0;
-      for (uint8_t j = 0; j < Command::COMMAND_END_LENGTH; j++) {
-        if (buffer[i - Command::COMMAND_END_LENGTH + j + 1] != Command::COMMAND_END[j]) errors++;
+      for (uint8_t j = 0; j < Command::END_LENGTH; j++) {
+        if (buffer[i - Command::END_LENGTH + j + 1] != Command::END[j]) errors++;
       }
       if (errors == 0) return i;
     }
@@ -91,7 +91,7 @@ uint16_t Parser::searchEnd(byte* buffer, uint16_t length, uint16_t from) {
 
 Command* Parser::searchCommand() {
   for (int16_t start = searchStart(buffer, bufferLength, 0); start != NOT_FIND; start = searchStart(buffer, bufferLength, start + 1)) {
-    for (int16_t end = searchEnd(buffer, bufferLength, start + Command::EMPTY_COMMAND_LENGTH - 1); end != NOT_FIND; end = searchEnd(buffer, bufferLength, end + 1)) {
+    for (int16_t end = searchEnd(buffer, bufferLength, start + Command::EMPTY_LENGTH - 1); end != NOT_FIND; end = searchEnd(buffer, bufferLength, end + 1)) {
       Command* command = Command::deserialize(buffer + start, end - start + 1);
       if (command != NULL) {
         trim(end + 1);

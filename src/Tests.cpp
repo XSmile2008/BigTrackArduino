@@ -4,61 +4,61 @@ void Tests::lifeTest() {
   int lifetime = 0;
   while (true) {
     Serial.println(lifetime++);
-    for (int i = 0; i < 100; i++) Serial.print(F("nyan"));
+    for (int i = 0; i < 100; i++) printf_P(PSTR("nyan"));
     delay(1000);
   }
 }
 
 void Tests::listTest() {
-  Serial.print(F("Free memory before test: ")); Serial.println(freeMemory());
-  Serial.print(F("create list: "));
+  printf_P(PSTR("Free memory before test: %d\n"), freeMemory());
+  printf_P(PSTR("create list: "));
   ArrayList<int> *list = new ArrayList<int>();
   list->print();
 
-  Serial.print(F("add 20 items: "));
+  printf_P(PSTR("add 20 items: "));
   for (int i = 0; i < 20; i++) list->add(i);
   list->print();
 
-  Serial.print(F("remove [5]: "));
+  printf_P(PSTR("remove [5]: "));
   list->remove(5);
   list->print();
 
-  Serial.print(F("trim: "));
+  printf_P(PSTR("trim: "));
   list->trimToSize();
   list->print();
 
-  Serial.print(F("remove [0]: "));
+  printf_P(PSTR("remove [0]: "));
   list->remove(0);
   list->print();
 
-  Serial.print(F("add 5 @[4]: "));
+  printf_P(PSTR("add 5 @[4]: "));
   list->add(4, 5);
   list->print();
 
-  Serial.print(F("remove [size - 1]: "));
+  printf_P(PSTR("remove [size - 1]: "));
   list->remove(list->size() - 1);
   list->print();
 
-  Serial.print(F("add 11 items: "));
+  printf_P(PSTR("add 11 items: "));
   for (int i = 0; i < 11; i++) list->add(i);
   list->print();
 
-  Serial.print(F("clear: "));
+  printf_P(PSTR("clear: "));
   list->clear();
   list->print();
 
   Serial.println(list->get(11));
 
-  Serial.print(F("add 11 items: "));
+  printf_P(PSTR("add 11 items: "));
   for (int i = 0; i < 11; i++) list->add(i);
   list->print();
 
   delete list;
-  Serial.print(F("after delete: ")); Serial.println(freeMemory());
+  printf_P(PSTR("after delete: %d\n"), freeMemory());
 }
 
 void Tests::circularBufferTest() {
-  Serial.print(F("Free memory before test: ")); Serial.println(freeMemory());
+  printf_P(PSTR("Free memory before test: %d\n"), freeMemory());
   CircularBuffer<int> *buffer =  new CircularBuffer<int>(5);
   buffer->put(5);
   buffer->put(3);
@@ -99,38 +99,84 @@ void Tests::circularBufferTest() {
   buffer->print();
 
   delete buffer;
-  Serial.println(F("Free memory before after test: ")); Serial.println(freeMemory());
+  printf_P(PSTR("Free memory before after test: %d\n"), freeMemory());
 }
 
-void Tests::commandTest() {
-  Serial.println();
-  Serial.print(F("start of test: ")); Serial.println(freeMemory());
+void Tests::parserTest() {
+  printf_P(PSTR("\nstart of test: %d\n"), freeMemory());
 
   Parser* parser = new Parser();
-  Serial.print(F("new Parser(): ")); Serial.println(freeMemory());
+  printf_P(PSTR("new Parser(): %d\n"), freeMemory());
 
-  const uint8_t dataLength = 24;
-  byte* data = new byte[dataLength] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10,    100,100,100,100,    58,58,97,0,13,10};
-
-  // const uint8_t dataLength = 12;
-  // byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
-
+  const uint8_t dataLength = 20;
+  byte* data = new byte[dataLength] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10,    /*100,100,100,100,*/    58,58,97,0,13,10};
+  //byte* data = new byte[dataLength] {58, 100,2, 101,1,11, 102,2,11,12, 13,10};
   //byte* data = new byte[dataLength] {58, 100, 0, 13,10};
-  Serial.print(F("after init test data: ")); Serial.println(freeMemory());
+
+  printf_P(PSTR("after init test data: %d\n"), freeMemory());
   List<Command*>* commands = parser->parse(data, dataLength);
   for (uint8_t i = 0; i < commands->size(); i++) {
-      commands->get(i)->serialize();
-      delete commands->get(i);
+    byte* bytes;
+    uint16_t slength;
+    commands->get(i)->serialize(bytes, slength);
+    Serial.write(bytes, slength);
+    delete[] bytes;
+    printf_P(PSTR("after send command: %d\n"), freeMemory());
+    delete commands->get(i);
   }
 
   delete[] data;
   delete commands;
   delete parser;
-  Serial.print(F("end of test: ")); Serial.println(freeMemory());
+  printf_P(PSTR("end of test: %d\n"), freeMemory());
+}
+
+void Tests::commandTest() {
+  Serial.println();
+  printf_P(PSTR("start of test: %d\n"), freeMemory());
+
+  // {
+  //   const uint8_t length = 4;
+  //   byte* data = new byte[length] {101,2,11,7};
+  //   Argument* a = new Argument(data, length);
+  //   // Argument* a = new Argument(data[0], data[1], &data[2]);
+  //   a->print();
+  //   delete a;
+  //   delete[] data;
+  //   printf_P(PSTR("end of test: %d\n"), freeMemory());
+  //   return;
+  // }
+
+  {
+    const uint8_t length = 14;
+    byte* data = new byte[length] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10};
+    printf_P(PSTR("after init test data: %d\n"), freeMemory());
+
+    Command* command = Command::deserialize(data, length);
+    printf_P(PSTR("after deserialize: %d\n"), freeMemory());
+
+    delay(3000);
+    int i = 100;
+    while (i-- > 0) {
+      byte* bytes;
+      uint16_t slength;
+      command->serialize(bytes, slength);
+      Serial.write(bytes, slength);
+      delete[] bytes;
+      printf_P(PSTR("after send command: %d\n"), freeMemory());
+    }
+
+    delete command;
+    printf_P(PSTR("after delete command: %d\n"), freeMemory());
+
+    delete[] data;
+  }
+
+  printf_P(PSTR("end of test: %d\n"), freeMemory());
 }
 
 void Tests::printBytes(byte bytes[], int size) {
-	Serial.print(F("bytes[")); Serial.print(size); Serial.println(F("]: --------------------"));
+  printf_P(PSTR("bytes[%d]: --------------------"), size);
 	for (int i = 0; i < size; i++) Serial.print((char) bytes[i]);
 	Serial.println();
 	for (int i = 0; i < size; i++) {Serial.print(bytes[i]); Serial.print(F(", "));}

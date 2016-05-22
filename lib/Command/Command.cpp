@@ -1,12 +1,12 @@
 #include "Command.h"
 
-const byte Command::COMMAND_START[] = {':', ':'};
-const uint8_t Command::COMMAND_START_LENGTH = 2;
+const byte Command::START[] = {':', ':'};
+const uint8_t Command::START_LENGTH = 2;
 
-const byte Command::COMMAND_END[] = {'\r', '\n'};
-const uint8_t Command::COMMAND_END_LENGTH = 2;
+const byte Command::END[] = {'\r', '\n'};
+const uint8_t Command::END_LENGTH = 2;
 
-const int Command::EMPTY_COMMAND_LENGTH = COMMAND_START_LENGTH + 2 + COMMAND_END_LENGTH;
+const int Command::EMPTY_LENGTH = START_LENGTH + 2 + END_LENGTH;
 
 Command::Command(byte key) {
 	Command::key = key;
@@ -24,48 +24,39 @@ Command::~Command() {
 	delete arguments;
 }
 
-void Command::serialize() {//TODO: check on multy argument commands
-	uint8_t size = EMPTY_COMMAND_LENGTH;
-	for (uint8_t i = 0; i < arguments->size(); i++) size += Argument::OFFSET + arguments->get(i)->getSize();
-	byte bytes[size];
-	memcpy(bytes, COMMAND_START, COMMAND_START_LENGTH);//TODO: test
-	uint8_t pos = COMMAND_START_LENGTH;
+void Command::serialize(byte*& bytes, uint16_t& length) {//TODO: check on multy argument commands
+	length = EMPTY_LENGTH;
+	for (uint8_t i = 0; i < arguments->size(); i++) length += Argument::OFFSET + arguments->get(i)->getSize();
+	bytes = new byte[length];
+	memcpy(bytes, START, START_LENGTH);//TODO: test
+	uint8_t pos = START_LENGTH;
 	bytes[pos++] = key;
 	bytes[pos++] = arguments->size();
 	for (uint8_t i = 0; i < arguments->size(); i++) {
-		bytes[pos++] = arguments->get(i)->getKey();
-		bytes[pos++] = arguments->get(i)->getSize();
-		memcpy(&bytes[pos], arguments->get(i)->getValue(), arguments->get(i)->getSize());
-		pos += arguments->get(i)->getSize();
+		memcpy(&bytes[pos], arguments->get(i)->getBytes(), arguments->get(i)->getLength());
+		pos += arguments->get(i)->getLength();
 	}
-	memcpy(&bytes[pos], COMMAND_END, COMMAND_END_LENGTH);//TODO: check
-
-	// Serial.println(F("serialized :"));
-	// for (uint8_t i  = 0; i < size; i++) { Serial.print(bytes[i]); Serial.print(F(", ")); }
-	// Serial.println();
-	Serial.write(bytes, size);
+	memcpy(&bytes[pos], END, END_LENGTH);//TODO: check
 }
 
 Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
-	if (bytesLength < EMPTY_COMMAND_LENGTH) return NULL;
-	uint16_t pos = COMMAND_START_LENGTH;
+	if (bytesLength < EMPTY_LENGTH) return NULL;
+	uint16_t pos = START_LENGTH;
 	uint8_t key = bytes[pos++];
 	uint8_t argsCount = bytes[pos++];
-
-	// Serial.println(bytesLength);	Serial.print(F("key = ")); Serial.print(key);
-	// Serial.print(F(" | argsCount = ")); Serial.println(argsCount);
+	printf_P(PSTR("Command::deserialize: lenght = %d, key = %d, argsCount = %d\n"), bytesLength, key, argsCount);//TODO: debug
 
 	List<Argument*>* arguments = new ArrayList<Argument*>(argsCount);
 	for (uint8_t i = 0; i < argsCount; i++) {
 		uint8_t argSize = bytes[pos + Argument::SIZE];
-		if (pos + Argument::OFFSET + argSize + COMMAND_END_LENGTH > bytesLength || argSize < 0) break;
+		if (pos + Argument::OFFSET + argSize + END_LENGTH > bytesLength) break;//TODO: "|| argSize < 0" check argsize, it can't be negative
 
-		arguments->add(new Argument(bytes[pos + Argument::KEY], bytes[pos + Argument::SIZE], &bytes[pos + Argument::OFFSET]));
-		pos += Argument::OFFSET + arguments->get(i)->getSize();
+		arguments->add(new Argument(&bytes[pos], argSize + Argument::OFFSET));
+		pos += arguments->get(i)->getLength();
 
-		// arguments->get(i)->print();
+		arguments->get(i)->print();//TODO: debug
 	}
-	if ((arguments->size() == argsCount) && (pos + COMMAND_END_LENGTH == bytesLength)) {
+	if ((arguments->size() == argsCount) && (pos + END_LENGTH == bytesLength)) {
 		return new Command(key, arguments);
 	} else {
 		for (uint8_t i = 0; i < arguments->size(); i++) delete arguments->get(i);

@@ -11,6 +11,7 @@ class Tests {
     static void lifeTest();
     static void listTest();
     static void circularBufferTest();
+    static void parserTest();
     static void commandTest();
     static void printBytes(byte bytes[], int size);
 };

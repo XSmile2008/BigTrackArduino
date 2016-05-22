@@ -4,20 +4,24 @@
 
 class Argument {
   public:
+    Argument(byte* bytes, int8_t length);
     Argument(byte key, byte size, void* value);
     ~Argument();
+
     byte getKey();
     byte getSize();
     void* getValue();
+
+    byte* getBytes();
+    uint8_t getLength();
+
     void print();
 
     static const uint8_t KEY = 0;
     static const uint8_t SIZE = 1;
     static const uint8_t OFFSET = 2;
   private:
-    byte key;
-	  byte size;
-	  void* value;
+	  byte* bytes;
 };
 
 #endif

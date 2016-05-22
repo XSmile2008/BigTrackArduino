@@ -9,6 +9,17 @@
 //TODO: refactoring Parser
 //TODO: try use structs to return array and array size
 
+static FILE uartout = { 0 };   // FILE struct
+static int uart_putchar (char c, FILE *stream){
+   if (c == '\n') Serial.write('\r');
+   Serial.write(c);
+   return 0;
+}
+static void printf_begin() {
+  fdev_setup_stream(&uartout, uart_putchar, NULL, _FDEV_SETUP_WRITE);
+  stdout = &uartout;
+}
+
 Chassis* chassis;
 Sonar* sonar;
 
@@ -16,9 +27,9 @@ Parser parser = Parser();
 byte* data = new byte[64];//TODO: test it!!!
 void serialEvent() {
   while (Serial.available()) {
-    Serial.print(F("FreeMem.onCreate: ")); Serial.println(freeMemory());
-    Serial.println(Serial.available());
+    printf_P(PSTR("FreeMem.onCreate: %d\n"), freeMemory());
 
+    Serial.println(Serial.available());
     int dataLength = Serial.available();
     Serial.readBytes(data, dataLength);
 
@@ -29,7 +40,7 @@ void serialEvent() {
     }
     delete commands;
 
-    Serial.print(F("FreeMem.onDestroy: ")); Serial.println(freeMemory());
+    printf_P(PSTR("FreeMem.onDestroy: %d\n"), freeMemory());
   }
 }
 
@@ -59,15 +70,16 @@ void runCommand(Command* command) {
 }
 
 void setup() {
-  // Wire.begin();//TODO: test without this and remove
+  printf_begin();
   Serial.begin(115200);
-  Serial.print(F("Boot complete, free memory: ")); Serial.println(freeMemory());
+  printf_P(PSTR("Boot complete, free memory: %d\n"), freeMemory());
   chassis = new Chassis(4, 7, 5, 6);
   sonar = new Sonar(10, 8, 9, 11, 12);
-  Serial.print(F("Intialising chassis, free memomory: ")); Serial.println(freeMemory());
+  printf_P(PSTR("Intialising chassis, free memomory: %d\n"), freeMemory());
   // chassis->test();
   // Tests::listTest();
-  Tests::commandTest();
+  // Tests::commandTest();
+  Tests::parserTest();
   // Tests::circularBufferTest();
   // sonar->task();
 }
@@ -82,8 +94,9 @@ void loop() {
       command->getArguments()->add(new Argument(AZIMUTH, 2, &data->angle));
       command->getArguments()->add(new Argument(DISTANCE, 2, &data->distance));
       command->getArguments()->add(new Argument(TIME, 4, &data->captureTime));
-      command->serialize();
-      Serial.println(String(data->captureTime) + ", angle = " + String(data->angle) + ", distance = " + String(data->distance));
+      // command->serialize();
+      printf_P(PSTR("%d, angle = %d, distance = %d\n"), data->captureTime, data->angle, data->distance);
+      // Serial.println(String(data->captureTime) + ", angle = " + String(data->angle) + ", distance = " + String(data->distance));
       delete data;
       delete command;
     }

@@ -46,7 +46,7 @@ void Chassis::telemetry() {
 
 		Command* telemetry = new Command('T');
 		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
-		telemetry->serialize();
+		// telemetry->serialize();
 		delete telemetry;
 		Serial.print(F("FreeMem.onEndTele: ")); Serial.println(freeMemory());
 	}
