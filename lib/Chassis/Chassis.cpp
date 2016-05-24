@@ -7,8 +7,9 @@ HMC5883L* Chassis::compass;
 Motor* Chassis::motorLeft;
 Motor* Chassis::motorRight;
 
-int16_t maxDelta = 255;
-int16_t maxOffset = 50, offsetY = -20;
+const int16_t maxDelta = 255;
+const int16_t maxOffset = 50;
+int16_t offsetY = -20;
 int16_t axisX, axisY;
 int16_t l, r;
 
@@ -25,8 +26,8 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 
 float e = 3;
 void Chassis::task() {
-	// telemetry();
-	checkMotorsSpeed();
+	telemetry();
+	// checkMotorsSpeed();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
 			rotateTo(targetAzimuth);
@@ -34,11 +35,12 @@ void Chassis::task() {
 	}
 }
 
+const uint16_t TELEMETRY_PAUSE = 30;
 unsigned long lastTele = 0;//TODO: check if millis() is 0
 void Chassis::telemetry() {
-	if (millis() > lastTele + 3000) {
+	if (millis() > lastTele + TELEMETRY_PAUSE) {
 		lastTele = millis();
-		Serial.print(F("\r\nFreeMem.onStartTele: ")); Serial.println(freeMemory());
+		printf_P(PSTR("\r\nFreeMem.onStartTele: %d\n"), freeMemory());
 		float currAzimuth = compass->getAzimuth();
 
 		// Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
@@ -46,9 +48,14 @@ void Chassis::telemetry() {
 
 		Command* telemetry = new Command('T');
 		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
-		// telemetry->serialize();
+		telemetry->getArguments()->add(new Argument('t', sizeof(unsigned long), &lastTele));
+		byte* buffer;
+		uint16_t length;
+		telemetry->serialize(buffer, length);
+		Serial.write(buffer, length);
+		delete[] buffer;
 		delete telemetry;
-		Serial.print(F("FreeMem.onEndTele: ")); Serial.println(freeMemory());
+		printf_P(PSTR("FreeMem.onEndTele: %d\n"), freeMemory());
 	}
 }
 
@@ -154,6 +161,7 @@ void Chassis::stop() {
 }
 
 void Chassis::move(int16_t x, int16_t y) {
+	// if (y >= 0) x = -x;
 	xy2lr(-x, y, l, r);//TODO: x axis is inversed
 	motorLeft->setPwm(abs(l));
 	motorRight->setPwm(abs(r));

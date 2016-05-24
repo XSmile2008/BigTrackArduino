@@ -30,9 +30,10 @@ class Sonar {
     static const int16_t ANGLE_OFFSET = 90;
 
     static const uint8_t ANGLE_STEP = 10;
-    static const uint8_t PAUSE_SCAN = 15;
-    static const uint8_t PAUSE_STEP = 250;
-    // static const uint16_t PAUSE_STEP = 1000;
+    // static const uint8_t PAUSE_SCAN = 15;
+    static const uint8_t PAUSE_SCAN = 250;
+    // static const uint8_t PAUSE_STEP = 250;
+    static const uint16_t PAUSE_STEP = 1000;
 
     static const uint8_t MAX_SCAN_DISTANCE = 250;
 

@@ -6,8 +6,9 @@
 #include "Tests.h"
 #include "Sonar.h"
 
-//TODO: refactoring Parser
-//TODO: try use structs to return array and array size
+//TODO: try to disable printf, try send sonar data directly without circular buffer, try handle serialEvent yourself;
+//TODO: debug new Sonar.task()!!!
+//TODO: hard test CircularBuffer
 
 static FILE uartout = { 0 };   // FILE struct
 static int uart_putchar (char c, FILE *stream){
@@ -27,7 +28,7 @@ Parser parser = Parser();
 byte* data = new byte[64];//TODO: test it!!!
 void serialEvent() {
   while (Serial.available()) {
-    printf_P(PSTR("serialEvent(%d) - %d\n"), Serial.available(), freeMemory());//TODO: debug
+    // printf_P(PSTR("serialEvent(%d) - %d\n"), Serial.available(), freeMemory());//TODO: debug
     // Serial.println(Serial.available());
 
     int dataLength = Serial.available();
@@ -40,7 +41,7 @@ void serialEvent() {
     }
     delete commands;
 
-    printf_P(PSTR("~serialEvent() - %d\n"), freeMemory());
+    // printf_P(PSTR("~serialEvent() - %d\n"), freeMemory());
   }
 }
 
@@ -85,7 +86,7 @@ void setup() {
 }
 
 void loop() {
-  chassis->task();
+  // chassis->task();
   sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
@@ -94,15 +95,14 @@ void loop() {
       command->getArguments()->add(new Argument(AZIMUTH, 2, &data->angle));
       command->getArguments()->add(new Argument(DISTANCE, 2, &data->distance));
       command->getArguments()->add(new Argument(TIME, 4, &data->captureTime));
+      // printf_P(PSTR("%lu, angle = %d, distance = %d, mem = %d\n"), data->captureTime, data->angle, data->distance, freeMemory());
       byte* buffer;
       uint16_t length;
       command->serialize(buffer, length);
       Serial.write(buffer, length);
       delete[] buffer;
-      printf_P(PSTR("%d, angle = %d, distance = %d\n"), data->captureTime, data->angle, data->distance);
-      // Serial.println(String(data->captureTime) + ", angle = " + String(data->angle) + ", distance = " + String(data->distance));
-      delete data;
       delete command;
+      delete data;
     }
   }
 }

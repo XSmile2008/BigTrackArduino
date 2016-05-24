@@ -5,31 +5,32 @@ CircularBuffer<SonarData*>* datas = new CircularBuffer<SonarData*>(20);
 int8_t diraction = 1;
 int16_t currAngle = 0;
 
-uint32_t lastStepTime = 0;
-
 Sonar::Sonar(uint8_t servoPin, uint8_t trig0, uint8_t echo0, uint8_t trig1, uint8_t echo1) {
   sonar = new NewPing*[2];
   sonar[0] = new NewPing(trig0, echo0, MAX_SCAN_DISTANCE);
   sonar[1] = new NewPing(trig1, echo1, MAX_SCAN_DISTANCE);
   servo.attach(servoPin);
   currAngle = ANGLE_MIN;
+  servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MAX, SERVO_MIN));//Reversed
 }
 
+//-1 change angle, 0 scan first sonar, 1 scan second sonar
+uint32_t lastTime = 0;
+int8_t nyan = -1;
 void Sonar::task() {
-  if (millis() >= lastStepTime + PAUSE_STEP) {
-    // Serial.print("free mem: ");Serial.println(freeMemory());
-    step();
+  uint32_t newTime = millis();
+  if (newTime >= lastTime + (nyan < 0 ? PAUSE_STEP : PAUSE_SCAN)) {
+    if (nyan == -1) {
+      step();
+    } else {
+      datas->put(scan(sonar[nyan], 180 * nyan));//TODO: this is hack
+    }
+    if (++nyan > 1) nyan = -1;//TODO: one more hack
+    lastTime = newTime;
   }
 }
 
 void Sonar::step() {
-  lastStepTime = millis();
-
-  datas->put(scan(sonar[0], 0));
-  delay(PAUSE_SCAN);
-  datas->put(scan(sonar[1], 180));
-  delay(PAUSE_SCAN);
-
   currAngle = currAngle + ANGLE_STEP * diraction;
   if (currAngle > ANGLE_MAX) {
     diraction = -diraction;
@@ -38,7 +39,7 @@ void Sonar::step() {
     diraction = -diraction;
     currAngle = ANGLE_MIN;
   }
-  servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MAX, SERVO_MIN));//Reverse
+  servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MAX, SERVO_MIN));//Reversed
 }
 
 SonarData* Sonar::scan(NewPing* sonar, int16_t offset) {
@@ -57,15 +58,15 @@ CircularBuffer<SonarData*>* Sonar::getData() {
 }
 
 void Sonar::test() {
-  Serial.print(F("Servo min value = ")); Serial.println(SERVO_MIN);
+  printf_P(PSTR("Servo min value = %d\n"), SERVO_MIN);
   servo.writeMicroseconds(SERVO_MIN);
   delay(10000);
 
-  Serial.print(F("Servo middle value = ")); Serial.println((SERVO_MIN + SERVO_MAX) / 2);
+  printf_P(PSTR("Servo middle value = %d\n"), (SERVO_MIN + SERVO_MAX) / 2);
   servo.writeMicroseconds((SERVO_MIN + SERVO_MAX) / 2);
   delay(10000);
 
-  Serial.print(F("Servo max value = ")); Serial.println(SERVO_MAX);
+  printf_P(PSTR("Servo max value = %d\n"), SERVO_MAX);
   servo.writeMicroseconds(SERVO_MAX);
   delay(10000);
 
