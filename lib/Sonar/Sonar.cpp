@@ -20,6 +20,7 @@ int8_t nyan = -1;
 void Sonar::task() {
   uint32_t newTime = millis();
   if (newTime >= lastTime + (nyan < 0 ? PAUSE_STEP : PAUSE_SCAN)) {
+    // printf_P(PSTR("state[%d] - %lu | %d\n"), nyan, millis(), freeMemory());
     if (nyan == -1) {
       step();
     } else {

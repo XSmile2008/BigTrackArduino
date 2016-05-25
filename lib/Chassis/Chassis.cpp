@@ -35,27 +35,28 @@ void Chassis::task() {
 	}
 }
 
-const uint16_t TELEMETRY_PAUSE = 30;
-unsigned long lastTele = 0;//TODO: check if millis() is 0
+const uint16_t TELEMETRY_PAUSE = 50;
+unsigned long lastTele;//TODO: check if millis() is 0
 void Chassis::telemetry() {
 	if (millis() > lastTele + TELEMETRY_PAUSE) {
 		lastTele = millis();
-		printf_P(PSTR("\r\nFreeMem.onStartTele: %d\n"), freeMemory());
+		int freemem = freeMemory();
+		// printf_P(PSTR("FreeMem.onStartTele: %d\n"), freemem);
 		float currAzimuth = compass->getAzimuth();
-
 		// Serial.print(F("azimuth = ")); Serial.print(currAzimuth);
 		// Serial.print(F(" | target = ")); Serial.println(targetAzimuth);
 
 		Command* telemetry = new Command('T');
 		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
 		telemetry->getArguments()->add(new Argument('t', sizeof(unsigned long), &lastTele));
+		telemetry->getArguments()->add(new Argument('m', sizeof(int), &freemem));
 		byte* buffer;
 		uint16_t length;
 		telemetry->serialize(buffer, length);
 		Serial.write(buffer, length);
 		delete[] buffer;
 		delete telemetry;
-		printf_P(PSTR("FreeMem.onEndTele: %d\n"), freeMemory());
+		// printf_P(PSTR("FreeMem.onEndTele: %d\n"), freeMemory());
 	}
 }
 

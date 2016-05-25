@@ -7,7 +7,6 @@
 #include "Sonar.h"
 
 //TODO: try to disable printf, try send sonar data directly without circular buffer, try handle serialEvent yourself;
-//TODO: debug new Sonar.task()!!!
 //TODO: hard test CircularBuffer
 
 static FILE uartout = { 0 };   // FILE struct
@@ -82,11 +81,10 @@ void setup() {
   // Tests::commandTest();
   // Tests::parserTest();
   // Tests::circularBufferTest();
-  // sonar->task();
 }
 
 void loop() {
-  // chassis->task();
+  chassis->task();
   sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
