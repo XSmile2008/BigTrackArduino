@@ -93,12 +93,8 @@ void loop() {
       command->getArguments()->add(new Argument(AZIMUTH, 2, &data->angle));
       command->getArguments()->add(new Argument(DISTANCE, 2, &data->distance));
       command->getArguments()->add(new Argument(TIME, 4, &data->captureTime));
+      command->toSerial();
       // printf_P(PSTR("%lu, angle = %d, distance = %d, mem = %d\n"), data->captureTime, data->angle, data->distance, freeMemory());
-      byte* buffer;
-      uint16_t length;
-      command->serialize(buffer, length);
-      Serial.write(buffer, length);
-      delete[] buffer;
       delete command;
       delete data;
     }

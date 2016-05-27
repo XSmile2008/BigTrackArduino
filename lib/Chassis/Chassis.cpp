@@ -50,11 +50,7 @@ void Chassis::telemetry() {
 		telemetry->getArguments()->add(new Argument('a', sizeof(currAzimuth), &currAzimuth));
 		telemetry->getArguments()->add(new Argument('t', sizeof(unsigned long), &lastTele));
 		telemetry->getArguments()->add(new Argument('m', sizeof(int), &freemem));
-		byte* buffer;
-		uint16_t length;
-		telemetry->serialize(buffer, length);
-		Serial.write(buffer, length);
-		delete[] buffer;
+		telemetry->toSerial();
 		delete telemetry;
 		// printf_P(PSTR("FreeMem.onEndTele: %d\n"), freeMemory());
 	}

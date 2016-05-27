@@ -65,6 +65,20 @@ Command* Command::deserialize(byte bytes[], uint16_t bytesLength) {
 	}
 }
 
+/**
+* Only for microcontrollers
+* TODO: test this. If improvements in speed are not big, remove this
+*/
+void Command::toSerial() {
+	Serial.write(START, START_LENGTH);
+	Serial.write(key);
+	Serial.write(arguments->size());
+	for (uint8_t i = 0; i < arguments->size(); i++) {
+		Serial.write(arguments->get(i)->getBytes(), arguments->get(i)->getLength());
+	}
+	Serial.write(END, END_LENGTH);
+}
+
 byte Command::getKey() {
 	return key;
 }

@@ -6,9 +6,9 @@ int8_t diraction = 1;
 int16_t currAngle = 0;
 
 Sonar::Sonar(uint8_t servoPin, uint8_t trig0, uint8_t echo0, uint8_t trig1, uint8_t echo1) {
-  sonar = new NewPing*[2];
-  sonar[0] = new NewPing(trig0, echo0, MAX_SCAN_DISTANCE);
-  sonar[1] = new NewPing(trig1, echo1, MAX_SCAN_DISTANCE);
+  sonars = new NewPing*[2];
+  sonars[0] = new NewPing(trig0, echo0, MAX_SCAN_DISTANCE);
+  sonars[1] = new NewPing(trig1, echo1, MAX_SCAN_DISTANCE);
   servo.attach(servoPin);
   currAngle = ANGLE_MIN;
   servo.writeMicroseconds(map(currAngle, ANGLE_MIN, ANGLE_MAX, SERVO_MAX, SERVO_MIN));//Reversed
@@ -24,7 +24,7 @@ void Sonar::task() {
     if (nyan == -1) {
       step();
     } else {
-      datas->put(scan(sonar[nyan], 180 * nyan));//TODO: this is hack
+      datas->put(scan(sonars[nyan], 180 * nyan));//TODO: this is hack
     }
     if (++nyan > 1) nyan = -1;//TODO: one more hack
     lastTime = newTime;

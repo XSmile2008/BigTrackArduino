@@ -135,41 +135,77 @@ void Tests::commandTest() {
   Serial.println();
   printf_P(PSTR("start of test: %d\n"), freeMemory());
 
-  // {
-  //   const uint8_t length = 4;
-  //   byte* data = new byte[length] {101,2,11,7};
-  //   Argument* a = new Argument(data, length);
-  //   // Argument* a = new Argument(data[0], data[1], &data[2]);
-  //   a->print();
-  //   delete a;
-  //   delete[] data;
-  //   printf_P(PSTR("end of test: %d\n"), freeMemory());
-  //   return;
-  // }
+  uint8_t test = 2;
+  switch (test) {
+    case 0: {
+      const uint8_t length = 4;
+      byte* data = new byte[length] {101,2,11,7};
+      Argument* a = new Argument(data, length);
+      // Argument* a = new Argument(data[0], data[1], &data[2]);
+      a->print();
+      delete a;
+      delete[] data;
+      printf_P(PSTR("end of test: %d\n"), freeMemory());
+      return;
+    }
+    case 1: {
+      const uint8_t length = 14;
+      byte* data = new byte[length] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10};
+      printf_P(PSTR("after init test data: %d\n"), freeMemory());
 
-  {
-    const uint8_t length = 14;
-    byte* data = new byte[length] {58,58,100,2, 101,2,11,7, 102,2,11,12, 13,10};
-    printf_P(PSTR("after init test data: %d\n"), freeMemory());
+      Command* command = Command::deserialize(data, length);
+      printf_P(PSTR("after deserialize: %d\n"), freeMemory());
 
-    Command* command = Command::deserialize(data, length);
-    printf_P(PSTR("after deserialize: %d\n"), freeMemory());
+      delay(3000);
+      int i = 100;
+      while (i-- > 0) {
+        byte* bytes;
+        uint16_t slength;
+        command->serialize(bytes, slength);
+        Serial.write(bytes, slength);
+        delete[] bytes;
+        printf_P(PSTR("after send command: %d\n"), freeMemory());
+      }
 
-    delay(3000);
-    int i = 100;
-    while (i-- > 0) {
+      delete command;
+      printf_P(PSTR("after delete command: %d\n"), freeMemory());
+
+      delete[] data;
+    }
+    case 2: {
+      Command* command = new Command('n');
+      int64_t nyan = 117;
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('y', 8, &nyan));
+      command->getArguments()->add(new Argument('a', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('y', 8, &nyan));
+      command->getArguments()->add(new Argument('a', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('y', 8, &nyan));
+      command->getArguments()->add(new Argument('a', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      command->getArguments()->add(new Argument('y', 8, &nyan));
+      command->getArguments()->add(new Argument('a', 8, &nyan));
+      command->getArguments()->add(new Argument('n', 8, &nyan));
+      delay(1000);
+      printf_P(PSTR("toSerial():start - %lu\n"), micros());
+      command->toSerial();
+      printf(PSTR("toSerial():end - %lu\n"), micros());
+      delay(3000);
+      printf(PSTR("serialize():start - %lu\n"), micros());
       byte* bytes;
       uint16_t slength;
       command->serialize(bytes, slength);
       Serial.write(bytes, slength);
       delete[] bytes;
-      printf_P(PSTR("after send command: %d\n"), freeMemory());
+      printf(PSTR("serialize():end - %lu\n"), micros());
+
+      delete command;
     }
-
-    delete command;
-    printf_P(PSTR("after delete command: %d\n"), freeMemory());
-
-    delete[] data;
   }
 
   printf_P(PSTR("end of test: %d\n"), freeMemory());

@@ -4,7 +4,7 @@
 
 class Motor {
   public:
-    Motor(uint8_t pinDir, uint8_t pwmPin);
+    Motor(uint8_t pinDir, uint8_t pinPwm);
     void handleStep();
 
     void stop();

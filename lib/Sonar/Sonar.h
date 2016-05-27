@@ -38,7 +38,7 @@ class Sonar {
     static const uint8_t MAX_SCAN_DISTANCE = 250;
 
     Servo servo;
-    NewPing** sonar;
+    NewPing** sonars;
 };
 
 #endif

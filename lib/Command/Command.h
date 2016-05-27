@@ -13,6 +13,7 @@ class Command {
 
 		void serialize(byte*& bytes, uint16_t& length);
 		static Command* deserialize(byte bytes[], uint16_t size);
+		void toSerial();
 
 		byte getKey();
 		void setKey(byte key);
