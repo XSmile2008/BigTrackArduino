@@ -31,7 +31,7 @@ private:
 	static void countStepsL();
 	static void countStepsR();
 	static void checkMotorsSpeed();
-	static void fill(int16_t& l, int16_t& r, int16_t minL, int16_t maxL, int16_t minR, int16_t maxR);
+	static void fill(int16_t& l, int16_t& r, int16_t min, int16_t max);
 	static int8_t percents(int16_t l, int16_t r);
 	static void xy2lr(int16_t x, int16_t y, int16_t& l, int16_t& r);
 

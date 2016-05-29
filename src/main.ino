@@ -85,7 +85,7 @@ void setup() {
 
 void loop() {
   chassis->task();
-  sonar->task();
+  // sonar->task();
   if (sonar->getData()->size() > 0) {
     for (uint8_t i = 0; i < sonar->getData()->size(); i++) {
       SonarData* data = sonar->getData()->popStart();

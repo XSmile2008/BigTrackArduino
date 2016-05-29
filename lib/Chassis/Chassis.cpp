@@ -13,6 +13,8 @@ int16_t offsetY = -20;
 int16_t axisX, axisY;
 int16_t l, r;
 
+int8_t pinBumpL = A0, pinBumpR = A1;//TODO: bump
+
 Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRight) {
 	compass = new HMC5883L();
 	motorLeft = new Motor(pinDirLeft, pinPwmLeft);
@@ -22,12 +24,14 @@ Chassis::Chassis(int pinDirLeft, int pinDirRight, int pinPwmLeft, int pinPwmRigh
 
 	attachInterrupt(0, Chassis::countStepsL, RISING);
 	attachInterrupt(1, Chassis::countStepsR, RISING);
-}
+
+	pinMode(pinBumpL, INPUT_PULLUP);
+	pinMode(pinBumpR, INPUT_PULLUP);}
 
 float e = 3;
 void Chassis::task() {
-	telemetry();
-	// checkMotorsSpeed();
+	// telemetry();
+	checkMotorsSpeed();
 	if (targetAzimuth != -1) {
 		if (abs(targetAzimuth - compass->getAzimuth()) >= e)
 			rotateTo(targetAzimuth);
@@ -73,15 +77,17 @@ void Chassis::countStepsR() {
 }
 
 void Chassis::checkMotorsSpeed() {
+	if (!digitalRead(pinBumpL) && l > 0) motorLeft->stop();//TODO: bump
+	if (!digitalRead(pinBumpR) && r > 0) motorRight->stop();//TODO: bump
 	if (motorLeft->getDir() == 0 || motorRight->getDir() == 0) return;
-	if (motorLeft->getSteps() > 0 && motorRight->getSteps() > 0 && false) {
+	if (motorLeft->getSteps() > 0 && motorRight->getSteps() > 0) {
 		offsetY -= percents(motorLeft->getStepTime(), motorRight->getStepTime());
 		offsetY = constrain(offsetY, -maxOffset, maxOffset);
 
-		int16_t pwmL = l - offsetY/2;
-		int16_t pwmR = r + offsetY/2;
+		int16_t pwmL = abs(l) - offsetY/2;
+		int16_t pwmR = abs(r) + offsetY/2;
 
-		fill(pwmL, pwmR, 0, 255, 0, 255);
+		fill(pwmL, pwmR, 0, 255);
 
 		motorLeft->setPwm(pwmL);
 		motorRight->setPwm(pwmR);
@@ -95,19 +101,15 @@ void Chassis::checkMotorsSpeed() {
 	}
 }
 
-void Chassis::fill(int16_t& l, int16_t& r, int16_t minL, int16_t maxL, int16_t minR, int16_t maxR) {
-	int16_t aboveL = l - maxL;
-	if (aboveL < 0) aboveL = 0;
-	int16_t belowL = l - minL;
-	if (belowL > 0) belowL = 0;
+void Chassis::fill(int16_t& l, int16_t& r, int16_t min, int16_t max) {
+	int16_t belowL = l > min ? 0 : l - min;
+	int16_t aboveL = l < max ? 0 : l - max;
+	int16_t belowR = r > min ? 0 : r - min;
+	int16_t aboveR = r < max ? 0 : r - max;
 
-	int16_t aboveR = r - maxR;
-	if (aboveR < 0) aboveR = 0;
-	int16_t belowR = r - minR;
-	if (belowR > 0) belowR = 0;
-
-	l = constrain(l + belowR - aboveR, minL, maxL);
-	r = constrain(r + belowL - aboveL, minR, maxR);
+	int16_t correction = - belowL - aboveL - belowR - aboveR;
+	l = constrain(l + correction, min, max);
+	r = constrain(r + correction, min, max);
 }
 
 /*
@@ -160,6 +162,8 @@ void Chassis::stop() {
 void Chassis::move(int16_t x, int16_t y) {
 	// if (y >= 0) x = -x;
 	xy2lr(-x, y, l, r);//TODO: x axis is inversed
+	if (!digitalRead(pinBumpL) && l > 0) l = 0;//TODO: bump
+	if (!digitalRead(pinBumpR) && r > 0) r = 0;//TODO: bump
 	motorLeft->setPwm(abs(l));
 	motorRight->setPwm(abs(r));
 	motorLeft->setDir(l == 0 ? 0 : (l > 0 ? 1 : -1));

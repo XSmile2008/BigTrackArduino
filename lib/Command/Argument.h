@@ -4,8 +4,9 @@
 
 class Argument {
   public:
-    Argument(byte* bytes, int8_t length);
+    Argument(byte key);
     Argument(byte key, byte size, void* value);
+    Argument(byte* bytes, int8_t length);
     ~Argument();
 
     byte getKey();
